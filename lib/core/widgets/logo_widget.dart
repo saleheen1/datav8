@@ -1,4 +1,5 @@
 import 'package:datav8/core/themes/custom_theme.dart';
+import 'package:datav8/core/widgets/show_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -11,12 +12,12 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = CustomTheme.of(context);
-    return SvgPicture.asset(
-      "",
-      width: width ?? 120,
-      height: height ?? 120,
-      colorFilter: ColorFilter.mode(color ?? theme.primary, BlendMode.srcIn),
+    return ShowImage(
+      imgLocation: "assets/images/logo.jpg",
+      width: width ?? 220,
+      height: height ?? 300,
+      fit: BoxFit.fitWidth,
+      isAssetImg: true,
     );
   }
 }

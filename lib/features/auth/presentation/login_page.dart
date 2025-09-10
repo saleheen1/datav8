@@ -22,50 +22,48 @@ class LoginPage extends StatelessWidget {
       onTap: () {
         hideKeyboard(context);
       },
-      child: LoaderWidget(
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: Center(
-            child: DefaultMarginWidget(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  LogoWidget(height: 150),
-                  Text('Login', style: TextUtils.title1Bold(context: context)),
-                  gapH(5),
-                  Text(
-                    'Enter your email and password to continue',
-                    style: TextUtils.b1Regular(
-                      context: context,
-                      color: theme.greyDark,
-                    ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: DefaultMarginWidget(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                LogoWidget(height: 150),
+                Text('Login', style: TextUtils.title1Bold(context: context)),
+                gapH(5),
+                Text(
+                  'Enter your email and password to continue',
+                  style: TextUtils.b1Regular(
+                    context: context,
+                    color: theme.greyDark,
                   ),
+                ),
 
-                  gapH(40),
-                  CustomInput(labelText: "Email", hintText: 'Enter email'),
-                  gapH(25),
-                  CustomInput(
-                    labelText: "Password",
-                    hintText: 'Enter password',
-                    isPasswordField: true,
-                  ),
+                gapH(40),
+                CustomInput(labelText: "Email", hintText: 'Enter email'),
+                gapH(25),
+                CustomInput(
+                  labelText: "Password",
+                  hintText: 'Enter password',
+                  isPasswordField: true,
+                ),
 
-                  gapH(25),
+                gapH(25),
 
-                  ButtonPrimary(text: 'Sign in', onPressed: () {}),
+                ButtonPrimary(text: 'Sign in', onPressed: () {}),
 
-                  gapH(25),
+                gapH(25),
 
-                  AuthBottomText(
-                    mainText: "Don’t have an account?  ",
-                    actionText: "Register",
-                    onTap: () {
-                      Get.to(() => SignUpPage());
-                    },
-                  ),
-                ],
-              ),
+                AuthBottomText(
+                  mainText: "Don’t have an account?  ",
+                  actionText: "Register",
+                  onTap: () {
+                    Get.to(() => SignUpPage());
+                  },
+                ),
+              ],
             ),
           ),
         ),
