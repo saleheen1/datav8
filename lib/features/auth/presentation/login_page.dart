@@ -8,7 +8,7 @@ import 'package:datav8/core/widgets/custom_input.dart';
 import 'package:datav8/core/widgets/default_margin_widget.dart';
 import 'package:datav8/core/widgets/logo_widget.dart';
 import 'package:datav8/features/auth/presentation/sign_up_page.dart';
-import 'package:datav8/features/home/presentation/home.dart';
+import 'package:datav8/features/home/presentation/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -53,7 +53,7 @@ class LoginPage extends StatelessWidget {
                 gapH(25),
 
                 ButtonPrimary(text: 'Sign in', onPressed: () {
-                  Get.to(Home());
+                  Get.to(HomePage());
                 }),
 
                 gapH(25),
