@@ -4,8 +4,10 @@ import 'package:datav8/core/widgets/appbar_common.dart';
 import 'package:datav8/core/widgets/button_primary.dart';
 import 'package:datav8/core/widgets/default_margin_widget.dart';
 import 'package:datav8/core/widgets/duration_card.dart';
+import 'package:datav8/features/chart/presentation/chart_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get/get.dart';
 
 class DurationPage extends StatelessWidget {
   final String deviceName;
@@ -76,7 +78,18 @@ class DurationPage extends StatelessWidget {
               //Seeing the graph button
               //=========================
               gapH(45),
-              ButtonPrimary(text: 'Next', onPressed: () {}),
+              ButtonPrimary(
+                text: 'Next',
+                onPressed: () {
+                  Get.to(
+                    ChartPage(
+                      deviceName: deviceName,
+                      duration: 'Last 24 hours',
+                      dateAndTime: '2023-05-03 10:21:33',
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),

@@ -1,4 +1,3 @@
-import 'package:datav8/core/themes/custom_theme.dart';
 import 'package:datav8/core/utils/text_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +7,6 @@ class DurationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = CustomTheme.of(context);
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
