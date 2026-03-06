@@ -9,6 +9,7 @@ final lightTheme = CustomThemeData(
   greyDark: const Color(0xff666B79),
   greyBg: const Color(0xffF7F7F7),
   warningRed: const Color(0xffB00707),
+  redLight: const Color(0xFFFF7474), 
   placeholder: const Color(0xff777C89),
   border: const Color(0xffE5E5E5),
   badgeBg: const Color(0xffF0F7F2),

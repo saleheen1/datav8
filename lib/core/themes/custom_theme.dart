@@ -12,6 +12,7 @@ class CustomThemeData {
   final Color badgeBg;
   final Color badgeText;
   final Color orangeColor;
+  final Color redLight;
 
   CustomThemeData({
     required this.primary,
@@ -25,6 +26,7 @@ class CustomThemeData {
     required this.badgeBg,
     required this.badgeText,
     required this.orangeColor,
+    required this.redLight
   });
 }
 
