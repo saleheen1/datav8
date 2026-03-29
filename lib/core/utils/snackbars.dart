@@ -10,7 +10,7 @@ void showSuccessSnackbar(String title, String message) {
     animationDuration: const Duration(milliseconds: 600),
     boxShadows: [
       BoxShadow(
-        color: Colors.grey.withOpacity(0.2),
+        color: Colors.grey.withValues(alpha: .2),
         blurRadius: 32,
         spreadRadius: 12,
       ),
@@ -20,6 +20,7 @@ void showSuccessSnackbar(String title, String message) {
     margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     maxWidth: 400,
+    onTap: (_) => Get.closeCurrentSnackbar(),
     titleText: Text(
       title,
       style: TextUtils.title3(
@@ -34,24 +35,33 @@ void showSuccessSnackbar(String title, String message) {
   );
 }
 
-void showErrorSnackbar(String title, String message) {
+void showErrorSnackbar(
+  String title,
+  String message, {
+  required String functionName,
+  int? durationInMilliseconds,
+}) {
+  debugPrint(
+    '[snackbars.dart]: 🔥 EXCEPTION:: from function [$functionName] -error message: $title $message',
+  );
   Get.snackbar(
     title,
     message,
     backgroundColor: Colors.white,
     boxShadows: [
       BoxShadow(
-        color: Colors.grey.withOpacity(0.2),
+        color: Colors.grey.withValues(alpha: .2),
         blurRadius: 32,
         spreadRadius: 12,
       ),
     ],
-    animationDuration: const Duration(milliseconds: 600),
+    animationDuration: Duration(milliseconds: durationInMilliseconds ?? 600),
     icon: Icon(Icons.close, color: Colors.red[500]),
     colorText: Colors.red[500],
     margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     maxWidth: 400,
+    onTap: (_) => Get.closeCurrentSnackbar(),
     titleText: Text(
       title,
       style: TextUtils.title3(
@@ -78,6 +88,7 @@ showAlertSnackbar(String title, String message) {
     margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     maxWidth: 400,
+    onTap: (_) => Get.closeCurrentSnackbar(),
     titleText: Text(
       title,
       style: TextUtils.title3(

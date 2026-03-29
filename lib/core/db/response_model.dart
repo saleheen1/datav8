@@ -1,0 +1,15 @@
+class ResponseModel<T> {
+  final bool _isSuccess;
+  final String _message;
+  final T _data;
+
+  ResponseModel(
+    this._isSuccess,
+    this._message,
+    this._data,
+  );
+
+  String get message => _message;
+  bool get isSuccess => _isSuccess;
+  T get data => _data;
+}
