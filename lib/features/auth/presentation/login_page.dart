@@ -8,7 +8,7 @@ import 'package:datav8/core/widgets/custom_input.dart';
 import 'package:datav8/core/widgets/default_margin_widget.dart';
 import 'package:datav8/core/widgets/loader_widget.dart';
 import 'package:datav8/core/widgets/logo_widget.dart';
-import 'package:datav8/features/auth/data/controller/login_controller.dart';
+import 'package:datav8/features/auth/data/controller/auth_controller.dart';
 import 'package:datav8/features/auth/presentation/sign_up_page.dart';
 import 'package:datav8/features/home/presentation/home_page.dart';
 import 'package:flutter/material.dart';
@@ -24,10 +24,10 @@ class LoginPage extends StatelessWidget {
       onTap: () {
         hideKeyboard(context);
       },
-      child: GetBuilder<LoginController>(
-        builder: (lc) {
+      child: GetBuilder<AuthController>(
+        builder: (ac) {
           return LoaderWidget(
-            isLoading: lc.isLoading,
+            isLoading: ac.isLoading,
             child: Scaffold(
               backgroundColor: Colors.white,
               body: Center(
@@ -52,13 +52,13 @@ class LoginPage extends StatelessWidget {
 
                       gapH(40),
                       CustomInput(
-                        controller: lc.emailController,
+                        controller: ac.emailController,
                         labelText: "Email",
                         hintText: 'Enter email',
                       ),
                       gapH(25),
                       CustomInput(
-                        controller: lc.passwordController,
+                        controller: ac.passwordController,
                         labelText: "Password",
                         hintText: 'Enter password',
                         isPasswordField: true,
@@ -69,7 +69,7 @@ class LoginPage extends StatelessWidget {
                       ButtonPrimary(
                         text: 'Sign in',
                         onPressed: () async {
-                          await lc.login();
+                          await ac.login();
                         },
                       ),
 

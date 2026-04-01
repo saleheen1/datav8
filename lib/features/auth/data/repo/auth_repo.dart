@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:datav8/core/db/api.dart';
 import 'package:datav8/core/db/db_client.dart';
 import 'package:datav8/core/db/response_model.dart';
 import 'package:get/get.dart';
@@ -5,13 +8,43 @@ import 'package:get/get.dart';
 class AuthRepo {
   final dbClient = Get.find<DbClient>();
 
-  Future<ResponseModel> login(String email, String password) async {
-    return await dbClient.requestWrapper(() async {
+  Future<ResponseModel<Map<String, dynamic>?>> login(
+    String email,
+    String password,
+  ) async {
+    return await dbClient.requestWrapper<Map<String, dynamic>>(() async {
       final response = await dbClient.instance.post(
-        'auth/login',
-        data: {"email": email, "password": password},
+        Api.login,
+        data: {"name": email, "pwd": password},
       );
-      return ResponseModel(true, "Login succeed", response.data);
+      final map = _parseJsonMap(response.data);
+      if (map == null) {
+        return ResponseModel<Map<String, dynamic>?>(
+          false,
+          'Unexpected response format',
+          null,
+        );
+      }
+      return ResponseModel<Map<String, dynamic>?>(
+        true,
+        'Login succeed',
+        map,
+      );
     }, functionName: 'login');
   }
+}
+
+/// Dio leaves the body as [String] when the server sends `text/html` even if the payload is JSON.
+Map<String, dynamic>? _parseJsonMap(dynamic data) {
+  if (data == null) return null;
+  if (data is Map) return Map<String, dynamic>.from(data);
+  if (data is String) {
+    final trimmed = data.trim();
+    if (trimmed.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (_) {}
+  }
+  return null;
 }
