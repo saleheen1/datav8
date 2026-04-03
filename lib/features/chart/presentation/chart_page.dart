@@ -9,13 +9,11 @@ import 'package:flutter/material.dart';
 class ChartPage extends StatelessWidget {
   final String deviceName;
   final String duration;
-  final String dateAndTime;
 
   const ChartPage({
     super.key,
     required this.deviceName,
     required this.duration,
-    required this.dateAndTime,
   });
 
   @override
@@ -44,9 +42,8 @@ class ChartPage extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 30),
                       child: CustomChart(
-                        dateAndTime: dateAndTime,
-                        values: [100, 60, 80, 140, 100, 120],
-                        labels: ['Ch1', 'Ch2', 'Ch3', 'Ch4', 'Ch5', 'Ch6'],
+                        values: [100, 60, 80, 140, 100],
+                        labels: ['Ch1', 'Ch2', 'Ch3', 'Ch4', 'Ch5'],
                       ),
                     );
                   },

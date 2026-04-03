@@ -50,7 +50,10 @@ class HomePage extends StatelessWidget {
                                   imeiNumber: d.imei,
                                   onPressed: () {
                                     Get.to(
-                                      () => DurationPage(deviceName: d.title),
+                                      () => DurationPage(
+                                        deviceName: d.title,
+                                        imei: d.imeiRaw,
+                                      ),
                                     );
                                   },
                                 ),

@@ -28,11 +28,12 @@ class UserDataModel {
       };
 
   /// Pairs [loggerList] with [imeiList] by index; skips rows where both are empty.
-  List<({String title, String imei})> get pairedDevices {
+  /// [imei] is for display; [imeiRaw] is the value to send to the API (may be empty).
+  List<({String title, String imei, String imeiRaw})> get pairedDevices {
     final imeis = imeiList ?? const <String>[];
     final names = loggerList ?? const <String>[];
     final n = imeis.length > names.length ? imeis.length : names.length;
-    final out = <({String title, String imei})>[];
+    final out = <({String title, String imei, String imeiRaw})>[];
     for (var i = 0; i < n; i++) {
       final imei = i < imeis.length ? imeis[i].trim() : '';
       final name = i < names.length ? names[i].trim() : '';
@@ -41,7 +42,7 @@ class UserDataModel {
           ? name
           : (imei.isNotEmpty ? imei : 'Device ${i + 1}');
       final imeiDisplay = imei.isNotEmpty ? imei : '—';
-      out.add((title: title, imei: imeiDisplay));
+      out.add((title: title, imei: imeiDisplay, imeiRaw: imei));
     }
     return out;
   }

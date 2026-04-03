@@ -4,16 +4,10 @@ import 'package:datav8/core/utils/ui_const.dart';
 import 'package:flutter/material.dart';
 
 class CustomChart extends StatelessWidget {
-  final String dateAndTime;
   final List<double> values;
   final List<String> labels;
 
-  const CustomChart({
-    super.key,
-    required this.dateAndTime,
-    required this.values,
-    required this.labels,
-  });
+  const CustomChart({super.key, required this.values, required this.labels});
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +16,8 @@ class CustomChart extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        //===================
-        //Date and time
-        //===================
-        Text(dateAndTime, style: TextUtils.title3(context: context)),
+        Text('12:00 AM - 5:00 AM', style: TextUtils.title3(context: context)),
         gapH(10),
-
         //===============================
         //Main graph/chart
         //===============================

@@ -1,21 +1,40 @@
+import 'package:datav8/core/themes/custom_theme.dart';
 import 'package:datav8/core/utils/text_utils.dart';
 import 'package:flutter/material.dart';
 
 class DurationCard extends StatelessWidget {
   final String title;
-  const DurationCard({super.key, required this.title});
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const DurationCard({
+    super.key,
+    required this.title,
+    this.selected = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    final theme = CustomTheme.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: const Color(0x1D000000), width: 1),
-      ),
-      child: Center(
-        child: Text(title, style: TextUtils.title2(context: context)),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: TextUtils.title2(context: context, color: theme.black),
+            ),
+          ),
+        ),
       ),
     );
   }
