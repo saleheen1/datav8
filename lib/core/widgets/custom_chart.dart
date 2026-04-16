@@ -238,7 +238,31 @@ class _CustomChartState extends State<CustomChart> {
       minY: minY,
       maxY: maxY,
       lineBarsData: lines,
-      lineTouchData: const LineTouchData(enabled: false),
+      lineTouchData: LineTouchData(
+        enabled: true,
+        handleBuiltInTouches: true,
+        touchSpotThreshold: 28,
+        touchTooltipData: LineTouchTooltipData(
+          fitInsideHorizontally: true,
+          fitInsideVertically: true,
+          tooltipPadding: const EdgeInsets.all(8),
+          tooltipMargin: 12,
+          getTooltipColor: (_) => Colors.black87,
+          getTooltipItems: (spots) {
+            if (spots.isEmpty) return const [];
+            final style = TextUtils.caption1(
+              context: context,
+            ).copyWith(color: Colors.white);
+            return spots.map((s) {
+              final ch = _channelColors.indexWhere((c) => c == s.bar.color);
+              final name = ch >= 0 && ch < _channelNames.length
+                  ? _channelNames[ch]
+                  : 'Ch?';
+              return LineTooltipItem('$name: ${s.y.toStringAsFixed(2)}', style);
+            }).toList();
+          },
+        ),
+      ),
     );
   }
 
