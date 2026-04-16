@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:datav8/core/db/api.dart';
 import 'package:datav8/core/db/db_client.dart';
 import 'package:datav8/core/db/response_model.dart';
+import 'package:datav8/core/utils/parse_json_map.dart';
 import 'package:get/get.dart';
 
 class AuthRepo {
@@ -17,7 +16,7 @@ class AuthRepo {
         Api.login,
         data: {"name": email, "pwd": password},
       );
-      final map = _parseJsonMap(response.data);
+      final map = parseJsonMap(response.data);
       if (map == null) {
         return ResponseModel<Map<String, dynamic>?>(
           false,
@@ -32,19 +31,4 @@ class AuthRepo {
       );
     }, functionName: 'login');
   }
-}
-
-/// Dio leaves the body as [String] when the server sends `text/html` even if the payload is JSON.
-Map<String, dynamic>? _parseJsonMap(dynamic data) {
-  if (data == null) return null;
-  if (data is Map) return Map<String, dynamic>.from(data);
-  if (data is String) {
-    final trimmed = data.trim();
-    if (trimmed.isEmpty) return null;
-    try {
-      final decoded = jsonDecode(trimmed);
-      if (decoded is Map) return Map<String, dynamic>.from(decoded);
-    } catch (_) {}
-  }
-  return null;
 }

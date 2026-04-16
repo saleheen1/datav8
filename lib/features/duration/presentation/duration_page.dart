@@ -50,11 +50,11 @@ class DurationPage extends StatelessWidget {
                                 selected: c.selected == c.options[index],
                                 onTap: () async {
                                   c.setSelected(c.options[index]);
-                                  // final ok = await cc.retrieveForDevice(
-                                  //   imei,
-                                  //   c.options[index],
-                                  // );
-                                  // if (!context.mounted || !ok) return;
+                                  final ok = await cc.retrieveForDevice(
+                                    imei,
+                                    c.options[index],
+                                  );
+                                  if (!context.mounted || !ok) return;
                                   Get.to(
                                     ChartPage(
                                       deviceName: deviceName,

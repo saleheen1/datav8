@@ -1,57 +1,45 @@
-import 'dart:convert';
-
 import 'package:datav8/core/db/api.dart';
 import 'package:datav8/core/db/db_client.dart';
 import 'package:datav8/core/db/response_model.dart';
+import 'package:datav8/core/utils/parse_json_map.dart';
+import 'package:datav8/features/duration/data/model/chart_retrieve_model.dart';
 import 'package:get/get.dart';
 
 class ChartRepo {
   final dbClient = Get.find<DbClient>();
 
-  Future<ResponseModel<Map<String, dynamic>?>> retrieve(
+  Future<ResponseModel<ChartRetrieveModel?>> retrieve(
     String imei,
     String token,
     int start,
     int end,
   ) async {
-    return await dbClient.requestWrapper<Map<String, dynamic>>(() async {
-      final response = await dbClient.instance.post(
-        Api.apiToken,
+    return await dbClient.requestWrapper<ChartRetrieveModel>(() async {
+      final dioResponse = await dbClient.instance.post(
+        Api.retrieve,
         data: {
           'imei': imei,
           'token': token,
-          'op': 'retrieve',
+          'op': 'retrievedecimate',
+          "num_pts": 10,
           'start': start,
           'end': end,
         },
       );
-      final map = _parseJsonMap(response.data);
+      final map = parseJsonMap(dioResponse.data);
       if (map == null) {
-        return ResponseModel<Map<String, dynamic>?>(
+        return ResponseModel<ChartRetrieveModel?>(
           false,
-          'Unexpected response format',
+          'Invalid retrieve response',
           null,
         );
       }
-      return ResponseModel<Map<String, dynamic>?>(
+      final parsed = ChartRetrieveModel.fromJson(map);
+      return ResponseModel<ChartRetrieveModel?>(
         true,
         'Retrieve succeed',
-        map,
+        parsed,
       );
     }, functionName: 'retrieve');
   }
-}
-
-Map<String, dynamic>? _parseJsonMap(dynamic data) {
-  if (data == null) return null;
-  if (data is Map) return Map<String, dynamic>.from(data);
-  if (data is String) {
-    final trimmed = data.trim();
-    if (trimmed.isEmpty) return null;
-    try {
-      final decoded = jsonDecode(trimmed);
-      if (decoded is Map) return Map<String, dynamic>.from(decoded);
-    } catch (_) {}
-  }
-  return null;
 }
