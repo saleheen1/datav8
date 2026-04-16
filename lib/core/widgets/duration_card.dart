@@ -27,11 +27,12 @@ class DurationCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(5),
+            border: Border.all(color: theme.border),
           ),
           child: Center(
             child: Text(
               title,
-              style: TextUtils.title2(context: context, color: theme.black),
+              style: TextUtils.b1SemiBold(context: context, color: theme.black),
             ),
           ),
         ),

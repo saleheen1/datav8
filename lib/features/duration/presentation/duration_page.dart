@@ -40,8 +40,8 @@ class DurationPage extends StatelessWidget {
                             crossAxisCount: 2,
                             itemCount: 3,
                             shrinkWrap: true,
-                            mainAxisSpacing: 25,
-                            crossAxisSpacing: 25,
+                            mainAxisSpacing: 20,
+                            crossAxisSpacing: 20,
                             padding: EdgeInsets.zero,
                             physics: const NeverScrollableScrollPhysics(),
                             itemBuilder: (context, index) {
