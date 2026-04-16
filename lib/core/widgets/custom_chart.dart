@@ -50,13 +50,14 @@ class _CustomChartState extends State<CustomChart> {
         ),
       );
     }
+    final chartHeight = _dynamicChartHeight(samples);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _legend(context),
-        AspectRatio(
-          aspectRatio: 2,
+        SizedBox(
+          height: chartHeight,
           child: Container(
             padding: const EdgeInsets.only(
               left: 12,
@@ -68,11 +69,37 @@ class _CustomChartState extends State<CustomChart> {
               borderRadius: radius(5),
               color: Colors.white,
             ),
-            child: LineChart(_chartData(context, samples, widget.timeLabels)),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final minWidthForAllLabels = (samples.length * 56).toDouble();
+                final chartWidth = math.max(
+                  constraints.maxWidth,
+                  minWidthForAllLabels,
+                );
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: chartWidth,
+                    child: LineChart(
+                      _chartData(context, samples, widget.timeLabels),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
     );
+  }
+
+  double _dynamicChartHeight(List<List<double?>> samples) {
+    final maxValue = _yRange(samples).max.abs();
+    const baseHeight = 220.0;
+    const maxHeight = 420.0;
+    // Grow chart height gradually as max values increase.
+    final extra = (maxValue / 50) * 18;
+    return (baseHeight + extra).clamp(baseHeight, maxHeight).toDouble();
   }
 
   Widget _legend(BuildContext context) {
@@ -125,7 +152,6 @@ class _CustomChartState extends State<CustomChart> {
     // X is discrete sample index (0 … n−1); grid must step by 1 so lines align
     // with data points. A fractional interval (e.g. (n−1)/6) draws between points.
     const verticalGridStep = 1.0;
-    final labelStep = math.max(1, (n / 6).ceil());
 
     return LineChartData(
       gridData: FlGridData(
@@ -162,10 +188,9 @@ class _CustomChartState extends State<CustomChart> {
               if (i < 0 || i >= n) {
                 return const SizedBox.shrink();
               }
-              if (i % labelStep != 0 && i != n - 1) {
-                return const SizedBox.shrink();
-              }
-              final style = TextUtils.caption1(context: context);
+              final style = TextUtils.caption1(
+                context: context,
+              ).copyWith(fontSize: 11);
               final text = (timeLabels != null && i < timeLabels.length)
                   ? timeLabels[i]
                   : '$i';
@@ -180,13 +205,25 @@ class _CustomChartState extends State<CustomChart> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 44,
+            reservedSize: 48,
             interval: hInterval,
+            minIncluded: true,
+            maxIncluded: false,
             getTitlesWidget: (value, meta) {
               final style = TextUtils.caption1(context: context);
-              return Text(
-                value.toStringAsFixed(value.abs() >= 100 ? 0 : 1),
-                style: style,
+              return SideTitleWidget(
+                meta: meta,
+                space: 6,
+                fitInside: SideTitleFitInsideData(
+                  enabled: true,
+                  axisPosition: meta.axisPosition,
+                  parentAxisSize: meta.parentAxisSize,
+                  distanceFromEdge: 2,
+                ),
+                child: Text(
+                  value.toStringAsFixed(value.abs() >= 100 ? 0 : 1),
+                  style: style,
+                ),
               );
             },
           ),
@@ -201,54 +238,46 @@ class _CustomChartState extends State<CustomChart> {
       minY: minY,
       maxY: maxY,
       lineBarsData: lines,
-      lineTouchData: LineTouchData(
-        touchTooltipData: LineTouchTooltipData(
-          getTooltipItems: (spots) {
-            final style = TextUtils.caption1(context: context);
-            return spots.map((s) {
-              final ch = _channelColors.indexWhere((c) => c == s.bar.color);
-              final name = ch >= 0 && ch < _channelNames.length
-                  ? _channelNames[ch]
-                  : '?';
-              return LineTooltipItem('$name: ${s.y.toStringAsFixed(2)}', style);
-            }).toList();
-          },
-        ),
-      ),
+      lineTouchData: const LineTouchData(enabled: false),
     );
   }
 
   List<LineChartBarData> _lineBars(List<List<double?>> samples) {
     final n = samples.length;
     final showDots = n <= 20;
-    return List.generate(5, (ch) {
-      final spots = <FlSpot>[];
-      for (var i = 0; i < n; i++) {
-        final row = samples[i];
-        if (ch >= row.length) continue;
-        final y = row[ch];
-        if (y != null) spots.add(FlSpot(i.toDouble(), y));
-      }
-      return LineChartBarData(
-        spots: spots,
-        color: _channelColors[ch],
-        isCurved: true,
-        curveSmoothness: 0.35,
-        barWidth: 2.5,
-        isStrokeCapRound: true,
-        dotData: FlDotData(
-          show: showDots,
-          getDotPainter: (spot, percent, bar, index) {
-            return FlDotCirclePainter(
-              radius: 3,
-              color: _channelColors[ch],
-              strokeWidth: 0,
-            );
-          },
-        ),
-        belowBarData: BarAreaData(show: false),
-      );
-    }).where((b) => b.spots.isNotEmpty).toList();
+    const drawOrder = [1, 2, 3, 4, 0];
+    return drawOrder
+        .map((ch) {
+          final spots = <FlSpot>[];
+          for (var i = 0; i < n; i++) {
+            final row = samples[i];
+            if (ch >= row.length) continue;
+            final y = row[ch];
+            if (y != null) spots.add(FlSpot(i.toDouble(), y));
+          }
+          return LineChartBarData(
+            spots: spots,
+            color: _channelColors[ch],
+            isCurved: true,
+            curveSmoothness: 0.35,
+            barWidth: ch == 0 ? 3.2 : 2.5,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: showDots,
+              getDotPainter: (spot, percent, bar, index) {
+                return FlDotCirclePainter(
+                  radius: 3,
+                  color: _channelColors[ch],
+                  strokeWidth: 1.2,
+                  strokeColor: Colors.white,
+                );
+              },
+            ),
+            belowBarData: BarAreaData(show: false),
+          );
+        })
+        .where((b) => b.spots.isNotEmpty)
+        .toList();
   }
 
   _YRange _yRange(List<List<double?>> samples) {
