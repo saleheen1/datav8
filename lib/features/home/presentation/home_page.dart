@@ -34,6 +34,8 @@ class HomePage extends StatelessWidget {
                       child: TabBar(
                         isScrollable: true,
                         tabAlignment: TabAlignment.start,
+                        labelColor: theme.primary,
+                        indicatorColor: theme.primary,
                         tabs: const [
                           Tab(text: 'View data'),
                           Tab(text: 'Set alarms'),

@@ -78,8 +78,9 @@ class SetAlarmsTab extends StatelessWidget {
         ),
         if (c.isAlarmActive[index]) ...[
           const SizedBox(height: 12),
-          SizedBox(
-            width: 260,
+          Container(
+            width: 220,
+            margin: EdgeInsets.only(bottom: 10),
             child: CustomInput(
               controller: c.upperLimitControllers[index],
               labelText: 'Upper Limit',
@@ -89,8 +90,9 @@ class SetAlarmsTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: 260,
+          Container(
+            margin: EdgeInsets.only(bottom: 10),
+            width: 220,
             child: CustomInput(
               controller: c.lowerLimitControllers[index],
               labelText: 'Lower Limit',
@@ -100,8 +102,9 @@ class SetAlarmsTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: 260,
+          Container(
+            margin: EdgeInsets.only(bottom: 10),
+            width: 220,
             child: CustomInput(
               controller: c.holdoffControllers[index],
               labelText: 'Alarm Holdoff (minutes)',
