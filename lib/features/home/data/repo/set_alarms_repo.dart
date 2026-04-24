@@ -7,6 +7,41 @@ import 'package:get/get.dart';
 class SetAlarmsRepo {
   final dbClient = Get.find<DbClient>();
 
+  Future<ResponseModel<String?>> getChannelParam({
+    required String imei,
+    required String token,
+    required int channel,
+    required String param,
+  }) async {
+    return await dbClient.requestWrapper<String>(() async {
+      final dioResponse = await dbClient.instance.post(
+        Api.retrieve,
+        data: {
+          'imei': imei,
+          'token': token,
+          'op': 'get',
+          'ch': '$channel',
+          'param': param,
+        },
+      );
+
+      final map = parseJsonMap(dioResponse.data);
+      if (map == null) {
+        return ResponseModel<String?>(false, 'Invalid get response', null);
+      }
+
+      final status = (map['status'] ?? '').toString().toLowerCase();
+      final message = (map['message'] ?? '').toString();
+      final value = (map['value'] ?? '').toString();
+      final isSuccess = status == 'success';
+      return ResponseModel<String?>(
+        isSuccess,
+        message.isNotEmpty ? message : status,
+        isSuccess ? value : null,
+      );
+    }, functionName: 'getChannelParam');
+  }
+
   Future<ResponseModel<bool?>> setChannelParam({
     required String imei,
     required String token,

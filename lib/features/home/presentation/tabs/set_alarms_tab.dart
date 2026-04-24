@@ -50,39 +50,47 @@ class SetAlarmsTab extends StatelessWidget {
               //===============================
               //Channel sections
               //===============================
-              for (int i = 0; i < SetAlarmsController.channelCount; i++) ...[
-                AlarmChannelSection(
-                  controller: c,
-                  index: i,
-                  title: _channelTitles[i],
-                ),
-
-                //===============================
-                //Save channel button
-                //===============================
-                if (c.isAlarmActive[i])
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      gapH(30),
-                      ButtonPrimary(
-                        text: 'Save channel ${i + 1}',
-                        onPressed: () => c.saveChannel(i),
-                        width: 160,
-                        borderRadius: 5,
-                        boxshadow: false,
-                        isLoading: c.isSavingChannel[i],
-                      ),
-                    ],
+              if (c.isFetchingAlarmConfig)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: CircularProgressIndicator(color: Colors.black),
+                  ),
+                )
+              else
+                for (int i = 0; i < SetAlarmsController.channelCount; i++) ...[
+                  AlarmChannelSection(
+                    controller: c,
+                    index: i,
+                    title: _channelTitles[i],
                   ),
 
-                //===============================
-                //Divider
-                //===============================
-                const SizedBox(height: 26),
-                const Divider(color: Colors.black12, thickness: 1),
-                const SizedBox(height: 26),
-              ],
+                  //===============================
+                  //Save channel button
+                  //===============================
+                  if (c.isAlarmActive[i])
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        gapH(30),
+                        ButtonPrimary(
+                          text: 'Save channel ${i + 1}',
+                          onPressed: () => c.saveChannel(i),
+                          width: 160,
+                          borderRadius: 5,
+                          boxshadow: false,
+                          isLoading: c.isSavingChannel[i],
+                        ),
+                      ],
+                    ),
+
+                  //===============================
+                  //Divider
+                  //===============================
+                  const SizedBox(height: 26),
+                  const Divider(color: Colors.black12, thickness: 1),
+                  const SizedBox(height: 26),
+                ],
             ],
           ),
         );

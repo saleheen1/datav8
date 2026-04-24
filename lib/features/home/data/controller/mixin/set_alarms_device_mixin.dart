@@ -3,6 +3,7 @@ import 'package:datav8/core/storage/auth_storage.dart';
 mixin SetAlarmsDeviceMixin {
   AuthStorage get authStorage;
   void update([List<Object>? ids, bool condition = true]);
+  void onSelectedDeviceChanged();
 
   List<({String title, String imeiRaw})> devices = [];
   String? selectedDeviceTitle;
@@ -28,6 +29,7 @@ mixin SetAlarmsDeviceMixin {
   void setSelectedDevice(String? value) {
     selectedDeviceTitle = value;
     update();
+    onSelectedDeviceChanged();
   }
 
   String? get selectedImeiRaw {
