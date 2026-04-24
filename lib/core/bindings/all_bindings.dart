@@ -5,6 +5,7 @@ import 'package:datav8/features/auth/data/repo/auth_repo.dart';
 import 'package:datav8/features/duration/data/chart_controller.dart';
 import 'package:datav8/features/duration/data/controller/duration_pick_controller.dart';
 import 'package:datav8/features/duration/data/repo/chart_repo.dart';
+import 'package:datav8/features/home/data/controller/set_alarms_controller.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,4 +21,5 @@ Future<void> initBindings() async {
   Get.put(AuthController());
   Get.put(DurationPickController());
   Get.put(ChartController());
+  Get.lazyPut(() => SetAlarmsController(), fenix: true);
 }
