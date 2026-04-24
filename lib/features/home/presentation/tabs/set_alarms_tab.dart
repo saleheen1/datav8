@@ -64,33 +64,39 @@ class SetAlarmsTab extends StatelessWidget {
                   )
               else
                 for (int i = 0; i < SetAlarmsController.channelCount; i++) ...[
-                  if (c.isChannelConfigLoading[i] &&
-                      !c.isChannelConfigLoaded[i])
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 30),
-                      child: AlarmChannelSectionSkeleton(
-                        title: _channelTitles[i],
-                      ),
-                    )
-                  else if (!c.isChannelConfigLoaded[i])
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 30),
-                      child: AlarmChannelSectionSkeleton(
-                        title: _channelTitles[i],
-                      ),
-                    )
-                  else
-                    AlarmChannelSection(
-                      controller: c,
-                      index: i,
-                      title: _channelTitles[i],
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      child:
+                          (c.isChannelConfigLoading[i] &&
+                                  !c.isChannelConfigLoaded[i]) ||
+                              !c.isChannelConfigLoaded[i]
+                          ? Padding(
+                              key: ValueKey('channel-skeleton-$i'),
+                              padding: const EdgeInsets.symmetric(vertical: 30),
+                              child: AlarmChannelSectionSkeleton(
+                                title: _channelTitles[i],
+                              ),
+                            )
+                          : AlarmChannelSection(
+                              key: ValueKey('channel-loaded-$i'),
+                              controller: c,
+                              index: i,
+                              title: _channelTitles[i],
+                            ),
                     ),
+                  ),
 
                   //===============================
                   //Save channel button
                   //===============================
                   if (c.isChannelConfigLoaded[i])
                     Column(
+                      key: ValueKey('save-btn-$i'),
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         gapH(30),
