@@ -2,6 +2,7 @@ import 'package:datav8/core/db/api.dart';
 import 'package:datav8/core/db/db_client.dart';
 import 'package:datav8/core/db/response_model.dart';
 import 'package:datav8/core/utils/parse_json_map.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 class SetAlarmsRepo {
@@ -12,10 +13,12 @@ class SetAlarmsRepo {
     required String token,
     required int channel,
     required String param,
+    CancelToken? cancelToken,
   }) async {
     return await dbClient.requestWrapper<String>(() async {
       final dioResponse = await dbClient.instance.post(
         Api.retrieve,
+        cancelToken: cancelToken,
         data: {
           'imei': imei,
           'token': token,

@@ -25,6 +25,7 @@ class SetAlarmsController extends GetxController
     super.onInit();
     initDevices();
     initChannelFormState();
+    initFetchState();
     loadSelectedDeviceAlarmConfig();
   }
 
@@ -35,6 +36,7 @@ class SetAlarmsController extends GetxController
 
   @override
   void onClose() {
+    cancelAlarmConfigLoading(notify: false);
     disposeChannelControllers();
     super.onClose();
   }

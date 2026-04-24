@@ -3,6 +3,7 @@ import 'package:datav8/core/widgets/button_primary.dart';
 import 'package:datav8/core/widgets/custom_dropdown.dart';
 import 'package:datav8/features/home/data/controller/set_alarms_controller.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/alarm_channel_section.dart';
+import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/alarm_channel_section_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,6 +21,8 @@ class SetAlarmsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SetAlarmsController>(
+      autoRemove: true,
+      assignId: true,
       builder: (c) {
         return Container(
           color: Colors.white,
@@ -50,25 +53,43 @@ class SetAlarmsTab extends StatelessWidget {
               //===============================
               //Channel sections
               //===============================
-              if (c.isFetchingAlarmConfig)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                    child: CircularProgressIndicator(color: Colors.black),
-                  ),
-                )
+              if (c.isChannelConfigLoaded.length !=
+                  SetAlarmsController.channelCount)
+                for (int i = 0; i < SetAlarmsController.channelCount; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
+                    child: AlarmChannelSectionSkeleton(
+                      title: _channelTitles[i],
+                    ),
+                  )
               else
                 for (int i = 0; i < SetAlarmsController.channelCount; i++) ...[
-                  AlarmChannelSection(
-                    controller: c,
-                    index: i,
-                    title: _channelTitles[i],
-                  ),
+                  if (c.isChannelConfigLoading[i] &&
+                      !c.isChannelConfigLoaded[i])
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 30),
+                      child: AlarmChannelSectionSkeleton(
+                        title: _channelTitles[i],
+                      ),
+                    )
+                  else if (!c.isChannelConfigLoaded[i])
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 30),
+                      child: AlarmChannelSectionSkeleton(
+                        title: _channelTitles[i],
+                      ),
+                    )
+                  else
+                    AlarmChannelSection(
+                      controller: c,
+                      index: i,
+                      title: _channelTitles[i],
+                    ),
 
                   //===============================
                   //Save channel button
                   //===============================
-                  if (c.isAlarmActive[i])
+                  if (c.isChannelConfigLoaded[i] && c.isAlarmActive[i])
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

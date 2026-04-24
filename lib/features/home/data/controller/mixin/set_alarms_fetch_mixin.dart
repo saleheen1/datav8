@@ -1,6 +1,7 @@
 import 'package:datav8/core/storage/auth_storage.dart';
 import 'package:datav8/core/utils/snackbars.dart';
 import 'package:datav8/features/home/data/repo/set_alarms_repo.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 mixin SetAlarmsFetchMixin {
@@ -17,15 +18,43 @@ mixin SetAlarmsFetchMixin {
   void update([List<Object>? ids, bool condition = true]);
 
   bool isFetchingAlarmConfig = false;
+  late List<bool> isChannelConfigLoading;
+  late List<bool> isChannelConfigLoaded;
+  CancelToken? _activeFetchCancelToken;
+  int _activeFetchRunId = 0;
+
+  void initFetchState() {
+    isChannelConfigLoading = List<bool>.filled(totalChannels, false);
+    isChannelConfigLoaded = List<bool>.filled(totalChannels, false);
+  }
+
+  void cancelAlarmConfigLoading({bool notify = true}) {
+    _activeFetchCancelToken?.cancel('Device changed');
+    _activeFetchCancelToken = null;
+    _activeFetchRunId++;
+    isFetchingAlarmConfig = false;
+    for (var i = 0; i < totalChannels; i++) {
+      isChannelConfigLoading[i] = false;
+    }
+    if (notify) {
+      update();
+    }
+  }
 
   Future<void> loadSelectedDeviceAlarmConfig() async {
-    if (isFetchingAlarmConfig) return;
+    cancelAlarmConfigLoading();
 
     final token = authStorage.readUser()?.token?.trim() ?? '';
     final imei = selectedImeiRaw?.trim() ?? '';
     if (token.isEmpty || imei.isEmpty) return;
 
+    final runId = _activeFetchRunId;
+    final cancelToken = CancelToken();
+    _activeFetchCancelToken = cancelToken;
+
     isFetchingAlarmConfig = true;
+    isChannelConfigLoading = List<bool>.filled(totalChannels, false);
+    isChannelConfigLoaded = List<bool>.filled(totalChannels, false);
     update();
 
     final params = [
@@ -38,22 +67,35 @@ mixin SetAlarmsFetchMixin {
 
     for (var i = 0; i < totalChannels; i++) {
       final channel = i + 1;
+      isChannelConfigLoading[i] = true;
+      update();
+
+      var channelLoaded = true;
       for (final param in params) {
         final response = await setAlarmsRepo.getChannelParam(
           imei: imei,
           token: token,
           channel: channel,
           param: param,
+          cancelToken: cancelToken,
         );
+        if (runId != _activeFetchRunId) return;
         if (!response.isSuccess || response.data == null) {
-          isFetchingAlarmConfig = false;
-          update();
+          final message = response.message.toLowerCase();
+          final wasCanceled =
+              message.contains('cancel') || message.contains('device changed');
+          if (wasCanceled) {
+            isChannelConfigLoading[i] = false;
+            update();
+            return;
+          }
+          channelLoaded = false;
           showErrorSnackbar(
             'Load failed',
             'Channel $channel - $param: ${response.message}',
             functionName: 'loadSelectedDeviceAlarmConfig',
           );
-          return;
+          break;
         }
 
         final value = response.data!.trim();
@@ -75,8 +117,20 @@ mixin SetAlarmsFetchMixin {
             break;
         }
       }
+
+      isChannelConfigLoading[i] = false;
+      isChannelConfigLoaded[i] = channelLoaded;
+      update();
+
+      if (!channelLoaded) {
+        isFetchingAlarmConfig = false;
+        update();
+        return;
+      }
     }
 
+    if (runId != _activeFetchRunId) return;
+    _activeFetchCancelToken = null;
     isFetchingAlarmConfig = false;
     update();
   }

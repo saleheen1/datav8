@@ -23,6 +23,15 @@ class DbClient extends GetxService {
       return await run();
     } on Map catch (e) {
       return ResponseModel<T?>(false, e['message'], null);
+    } on DioException catch (e) {
+      // Request cancellation is expected in flows like device switching.
+      // Avoid noisy snackbars/logs for this case.
+      if (e.type == DioExceptionType.cancel) {
+        return ResponseModel<T?>(false, 'Request cancelled', null);
+      }
+      showErrorSnackbar('Error', e.toString(), functionName: functionName);
+      debugPrint('[db_client.dart]: 🔥 EXCEPTION:: $e');
+      return ResponseModel<T?>(false, e.toString(), null);
     } on SocketException catch (_) {
       return ResponseModel<T?>(false, 'Network error!', null);
     } catch (e) {
