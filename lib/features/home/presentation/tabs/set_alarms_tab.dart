@@ -1,9 +1,8 @@
-import 'package:datav8/core/utils/text_utils.dart';
 import 'package:datav8/core/utils/ui_const.dart';
 import 'package:datav8/core/widgets/button_primary.dart';
-import 'package:datav8/core/widgets/custom_checkbox.dart';
-import 'package:datav8/core/widgets/custom_input.dart';
+import 'package:datav8/core/widgets/custom_dropdown.dart';
 import 'package:datav8/features/home/data/controller/set_alarms_controller.dart';
+import 'package:datav8/features/home/presentation/tabs/widgets/alarm_channel_section.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,9 +26,40 @@ class SetAlarmsTab extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              for (int i = 0; i < SetAlarmsController.channelCount; i++) ...[
-                _buildChannelSection(context, c, i),
+              //===============================
+              //Select device
+              //===============================
+              Container(
+                color: Colors.grey[100],
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.only(bottom: 34),
+                child: Column(
+                  children: [
+                    CustomDropDown(
+                      label: 'Select device',
+                      items: c.devices.map((d) => d.title).toList(),
+                      value: c.selectedDeviceTitle,
+                      onChange: c.setSelectedDevice,
+                      borderColor: Colors.black26,
+                      bgColor: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
 
+              //===============================
+              //Channel sections
+              //===============================
+              for (int i = 0; i < SetAlarmsController.channelCount; i++) ...[
+                AlarmChannelSection(
+                  controller: c,
+                  index: i,
+                  title: _channelTitles[i],
+                ),
+
+                //===============================
+                //Save channel button
+                //===============================
                 if (c.isAlarmActive[i])
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,13 +67,18 @@ class SetAlarmsTab extends StatelessWidget {
                       gapH(30),
                       ButtonPrimary(
                         text: 'Save channel ${i + 1}',
-                        onPressed: c.saveAlarms,
+                        onPressed: () => c.saveChannel(i),
                         width: 160,
                         borderRadius: 5,
                         boxshadow: false,
+                        isLoading: c.isSavingChannel[i],
                       ),
                     ],
                   ),
+
+                //===============================
+                //Divider
+                //===============================
                 const SizedBox(height: 26),
                 const Divider(color: Colors.black12, thickness: 1),
                 const SizedBox(height: 26),
@@ -52,77 +87,6 @@ class SetAlarmsTab extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildChannelSection(
-    BuildContext context,
-    SetAlarmsController c,
-    int index,
-  ) {
-    final channelNo = index + 1;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _channelTitles[index],
-          style: TextUtils.title1Bold(context: context, color: Colors.black),
-        ),
-        const SizedBox(height: 10),
-        CustomCheckbox(
-          title: 'Alarms active on channel $channelNo',
-          value: c.isAlarmActive[index],
-          onChanged: (v) {
-            c.toggleAlarmActive(index, v ?? false);
-          },
-        ),
-        if (c.isAlarmActive[index]) ...[
-          const SizedBox(height: 12),
-          Container(
-            width: 220,
-            margin: EdgeInsets.only(bottom: 10),
-            child: CustomInput(
-              controller: c.upperLimitControllers[index],
-              labelText: 'Upper Limit',
-              isNumberField: true,
-              paddingVertical: 12,
-              borderColor: Colors.black26,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            margin: EdgeInsets.only(bottom: 10),
-            width: 220,
-            child: CustomInput(
-              controller: c.lowerLimitControllers[index],
-              labelText: 'Lower Limit',
-              isNumberField: true,
-              paddingVertical: 12,
-              borderColor: Colors.black26,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            margin: EdgeInsets.only(bottom: 10),
-            width: 220,
-            child: CustomInput(
-              controller: c.holdoffControllers[index],
-              labelText: 'Alarm Holdoff (minutes)',
-              isNumberField: true,
-              paddingVertical: 12,
-              borderColor: Colors.black26,
-            ),
-          ),
-          const SizedBox(height: 12),
-          CustomCheckbox(
-            title: 'Channel sends alarm every hour while in alarm condition',
-            value: c.sendHourlyAlarm[index],
-            onChanged: (v) {
-              c.toggleSendHourlyAlarm(index, v ?? false);
-            },
-          ),
-        ],
-      ],
     );
   }
 }

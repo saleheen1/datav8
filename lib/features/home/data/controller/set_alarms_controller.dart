@@ -1,59 +1,30 @@
-import 'package:flutter/material.dart';
+import 'package:datav8/core/storage/auth_storage.dart';
+import 'package:datav8/features/home/data/controller/mixin/set_alarms_device_mixin.dart';
+import 'package:datav8/features/home/data/controller/mixin/set_alarms_form_mixin.dart';
+import 'package:datav8/features/home/data/controller/mixin/set_alarms_save_mixin.dart';
+import 'package:datav8/features/home/data/repo/set_alarms_repo.dart';
 import 'package:get/get.dart';
 
-class SetAlarmsController extends GetxController {
+class SetAlarmsController extends GetxController
+    with SetAlarmsDeviceMixin, SetAlarmsFormMixin, SetAlarmsSaveMixin {
   static const int channelCount = 5;
-
-  late final List<bool> isAlarmActive;
-  late final List<bool> sendHourlyAlarm;
-  late final List<TextEditingController> upperLimitControllers;
-  late final List<TextEditingController> lowerLimitControllers;
-  late final List<TextEditingController> holdoffControllers;
+  @override
+  int get totalChannels => channelCount;
+  @override
+  final SetAlarmsRepo setAlarmsRepo = Get.find<SetAlarmsRepo>();
+  @override
+  final AuthStorage authStorage = Get.find<AuthStorage>();
 
   @override
   void onInit() {
     super.onInit();
-    isAlarmActive = List<bool>.filled(channelCount, true);
-    sendHourlyAlarm = List<bool>.filled(channelCount, true);
-    upperLimitControllers = List.generate(
-      channelCount,
-      (_) => TextEditingController(text: '13'),
-    );
-    lowerLimitControllers = List.generate(
-      channelCount,
-      (_) => TextEditingController(text: '12'),
-    );
-    holdoffControllers = List.generate(
-      channelCount,
-      (_) => TextEditingController(text: '2'),
-    );
-  }
-
-  void toggleAlarmActive(int index, bool value) {
-    isAlarmActive[index] = value;
-    update();
-  }
-
-  void toggleSendHourlyAlarm(int index, bool value) {
-    sendHourlyAlarm[index] = value;
-    update();
-  }
-
-  void saveAlarms() {
-    // TODO: connect with API when endpoint is ready.
+    initDevices();
+    initChannelFormState();
   }
 
   @override
   void onClose() {
-    for (final c in upperLimitControllers) {
-      c.dispose();
-    }
-    for (final c in lowerLimitControllers) {
-      c.dispose();
-    }
-    for (final c in holdoffControllers) {
-      c.dispose();
-    }
+    disposeChannelControllers();
     super.onClose();
   }
 }
