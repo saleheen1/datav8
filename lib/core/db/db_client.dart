@@ -9,7 +9,13 @@ class DbClient extends GetxService {
   late Dio instance;
 
   void init() {
-    instance = Dio();
+    instance = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
+      ),
+    );
     instance.interceptors.add(
       LogInterceptor(responseBody: true, requestBody: true),
     );

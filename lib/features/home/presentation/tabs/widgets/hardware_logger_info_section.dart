@@ -1,5 +1,6 @@
 import 'package:datav8/core/utils/text_utils.dart';
 import 'package:datav8/core/utils/ui_const.dart';
+import 'package:datav8/core/widgets/button_primary.dart';
 import 'package:datav8/core/widgets/custom_input.dart';
 import 'package:flutter/material.dart';
 
@@ -9,11 +10,15 @@ class HardwareLoggerInfoSection extends StatelessWidget {
     required this.ownerController,
     required this.loggerNameController,
     required this.locationController,
+    required this.onSavePressed,
+    this.isSaving = false,
   });
 
   final TextEditingController ownerController;
   final TextEditingController loggerNameController;
   final TextEditingController locationController;
+  final VoidCallback onSavePressed;
+  final bool isSaving;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +59,15 @@ class HardwareLoggerInfoSection extends StatelessWidget {
             focusedBorderColor: Colors.black,
             bgColor: Colors.white,
             paddingVertical: 12,
+          ),
+          gapH(24),
+          ButtonPrimary(
+            text: 'Save logger info',
+            onPressed: onSavePressed,
+            width: 180,
+            borderRadius: 5,
+            boxshadow: false,
+            isLoading: isSaving,
           ),
         ],
       ),

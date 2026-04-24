@@ -5,156 +5,176 @@ import 'package:datav8/core/widgets/custom_checkbox.dart';
 import 'package:datav8/core/widgets/custom_dropdown.dart';
 import 'package:datav8/core/widgets/custom_input.dart';
 import 'package:datav8/core/widgets/show_image.dart';
+import 'package:datav8/features/home/data/controller/set_hardware_configurations_controller.dart';
+import 'package:datav8/features/home/data/controller/set_hardware_sensor_dropdown_controller.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/hardware_logger_info_section.dart';
+import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/hardware_channel_section_skeleton.dart';
+import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/hardware_logger_info_skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class SetHardwareConfigurationsTab extends StatefulWidget {
+class SetHardwareConfigurationsTab extends StatelessWidget {
   const SetHardwareConfigurationsTab({super.key});
 
   @override
-  State<SetHardwareConfigurationsTab> createState() =>
-      _SetHardwareConfigurationsTabState();
-}
-
-class _SetHardwareConfigurationsTabState
-    extends State<SetHardwareConfigurationsTab> {
-  static const int _channelCount = 5;
-
-  static const List<String> _slotDropdownLabels = [
-    'Select Measurement Module in leftmost slot',
-    'Select Measurement Module in second from left slot',
-    'Select Measurement Module in middle slot',
-    'Select Measurement Module in second from right slot',
-    'Select Measurement Module in rightmost slot',
-  ];
-
-  static const List<String> _moduleOptions = [
-    'Temperature Module',
-    'Current Module',
-    'Voltage Module',
-    'Humidity Module',
-  ];
-
-  final _ownerController = TextEditingController();
-  final _loggerNameController = TextEditingController();
-  final _locationController = TextEditingController();
-  late final List<bool> _channelInUse;
-  late final List<TextEditingController> _channelNameControllers;
-  late final List<String> _selectedModules;
-
-  @override
-  void initState() {
-    super.initState();
-    _channelInUse = List<bool>.filled(_channelCount, true);
-    _channelNameControllers = List.generate(
-      _channelCount,
-      (_) => TextEditingController(),
-    );
-    _selectedModules = List<String>.filled(_channelCount, _moduleOptions.first);
-  }
-
-  @override
-  void dispose() {
-    _ownerController.dispose();
-    _loggerNameController.dispose();
-    _locationController.dispose();
-    for (final c in _channelNameControllers) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          //===============================
-          //Logger info
-          //===============================
-          HardwareLoggerInfoSection(
-            ownerController: _ownerController,
-            loggerNameController: _loggerNameController,
-            locationController: _locationController,
-          ),
-
-          //===============================
-          //Channel sections
-          //===============================
-          for (int i = 0; i < _channelCount; i++) ...[
-            Text(
-              'Channel ${i + 1}',
-              style: TextUtils.title1Bold(
-                context: context,
-                color: Colors.black,
-              ),
-            ),
-            gapH(10),
-            CustomCheckbox(
-              title: 'Channel ${i + 1} in use',
-              value: _channelInUse[i],
-              onChanged: (v) {
-                setState(() => _channelInUse[i] = v ?? false);
-              },
-            ),
-            if (_channelInUse[i]) ...[
-              gapH(12),
-              SizedBox(
-                width: 260,
-                child: CustomInput(
-                  controller: _channelNameControllers[i],
-                  labelText: 'Give this channel a name',
-                  hintText: 'Enter channel name',
-                ),
-              ),
-              gapH(25),
-              CustomDropDown(
-                label: _slotDropdownLabels[i],
-                items: _moduleOptions,
-                value: _selectedModules[i],
-                onChange: (v) {
-                  if (v == null) return;
-                  setState(() => _selectedModules[i] = v);
-                },
-                borderColor: Colors.black26,
-              ),
-              gapH(20),
-              Row(
+    return GetBuilder<SetHardwareConfigurationsController>(
+      builder: (c) {
+        return GetBuilder<SetHardwareSensorDropdownController>(
+          builder: (s) {
+            return Container(
+              color: Colors.white,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
                 children: [
-                  Expanded(
-                    child: ShowImage(
-                      imgLocation:
-                          'https://images.unsplash.com/photo-1776943340398-67524b7bcf7f?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      isAssetImg: false,
+                  //===============================
+                  //Select device
+                  //===============================
+                  Container(
+                    color: Colors.grey[100],
+                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.only(bottom: 34),
+                    child: Column(
+                      children: [
+                        CustomDropDown(
+                          label: 'Select device',
+                          items: c.devices.map((d) => d.title).toList(),
+                          value: c.selectedDeviceTitle,
+                          onChange: c.setSelectedDevice,
+                          borderColor: Colors.black26,
+                          bgColor: Colors.white,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ShowImage(
-                      imgLocation:
-                          'https://images.unsplash.com/photo-1776943340398-67524b7bcf7f?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      isAssetImg: false,
+
+                  //===============================
+                  //Logger info
+                  //===============================
+                  (c.isLoggerInfoLoading || !c.isLoggerInfoLoaded)
+                      ? const HardwareLoggerInfoSkeleton()
+                      : HardwareLoggerInfoSection(
+                          ownerController: c.ownerController,
+                          loggerNameController: c.loggerNameController,
+                          locationController: c.locationController,
+                          onSavePressed: c.saveLoggerInfo,
+                          isSaving: c.isSavingLoggerInfo,
+                        ),
+
+                  //===============================
+                  //Channel sections
+                  //===============================
+                  for (
+                    int i = 0;
+                    i < SetHardwareConfigurationsController.channelCount;
+                    i++
+                  ) ...[
+                    Text(
+                      'Channel ${i + 1}',
+                      style: TextUtils.title1Bold(
+                        context: context,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
+                    gapH(10),
+                    if (!c.isChannelConfigLoading[i] &&
+                        c.isChannelConfigLoaded[i])
+                      CustomCheckbox(
+                        title: 'Channel ${i + 1} in use',
+                        value: c.channelInUse[i],
+                        onChanged: (v) {
+                          c.toggleChannelInUse(i, v ?? false);
+                        },
+                      ),
+                    if (c.isChannelConfigLoading[i] ||
+                        !c.isChannelConfigLoaded[i])
+                      const HardwareChannelSectionSkeleton()
+                    else if (c.isChannelConfigLoaded[i] &&
+                        c.channelInUse[i]) ...[
+                      gapH(12),
+                      SizedBox(
+                        width: 260,
+                        child: CustomInput(
+                          controller: c.channelNameControllers[i],
+                          labelText: 'Give this channel a name',
+                          hintText: 'Enter channel name',
+                        ),
+                      ),
+                      gapH(25),
+                      CustomDropDown(
+                        label: SetHardwareConfigurationsController
+                            .slotDropdownLabels[i],
+                        items: s.dropdownItems,
+                        value: s.selectedLabelForChannel(i),
+                        onChange: (v) {
+                          if (v == null) return;
+                          s.setSelectedByLabel(i, v);
+                        },
+                        borderColor: Colors.black26,
+                        readonly:
+                            c.isLoadingConfig ||
+                            s.isLoading ||
+                            s.dropdownItems.isEmpty,
+                      ),
+                      gapH(20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildSensorImage(
+                              s.sensorImageForChannel(i),
+                              'Sensor image',
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildSensorImage(
+                              s.moduleImageForChannel(i),
+                              'Module image',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    gapH(30),
+                    if (!c.isChannelConfigLoading[i] &&
+                        c.isChannelConfigLoaded[i])
+                      ButtonPrimary(
+                        text: 'Save channel ${i + 1}',
+                        onPressed: () => c.saveChannel(i),
+                        width: 160,
+                        borderRadius: 5,
+                        boxshadow: false,
+                        isLoading: c.isSavingChannel[i],
+                      ),
+                    const SizedBox(height: 26),
+                    const Divider(color: Colors.black12, thickness: 1),
+                    const SizedBox(height: 26),
+                  ],
                 ],
               ),
-              gapH(30),
-              ButtonPrimary(
-                text: 'Save channel ${i + 1}',
-                onPressed: () {},
-                width: 160,
-                borderRadius: 5,
-                boxshadow: false,
-              ),
-            ],
-            const SizedBox(height: 26),
-            const Divider(color: Colors.black12, thickness: 1),
-            const SizedBox(height: 26),
-          ],
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  Widget _buildSensorImage(String imageUrl, String placeholderText) {
+    if (imageUrl.isEmpty) {
+      return Container(
+        height: 110,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black12),
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.grey[100],
+        ),
+        child: Text(
+          placeholderText,
+          style: const TextStyle(color: Colors.black54),
+        ),
+      );
+    }
+    return ShowImage(imgLocation: imageUrl, isAssetImg: false);
   }
 }
