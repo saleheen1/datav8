@@ -89,7 +89,7 @@ class SetAlarmsTab extends StatelessWidget {
                   //===============================
                   //Save channel button
                   //===============================
-                  if (c.isChannelConfigLoaded[i] && c.isAlarmActive[i])
+                  if (c.isChannelConfigLoaded[i])
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
