@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
                         tabs: const [
                           Tab(text: 'View data'),
                           Tab(text: 'Set alarms'),
-                          Tab(text: 'Set hardware configurations'),
+                          Tab(text: 'Logger setup'),
                           Tab(text: 'Delete old data'),
                         ],
                       ),

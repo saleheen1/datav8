@@ -25,14 +25,13 @@ class _SplashPageState extends State<SplashPage> {
     final auth = Get.find<AuthController>();
     await auth.restoreSessionIfAny();
     if (!mounted) return;
-    Get.offAll(
-      () => auth.isLoggedIn ? const HomePage() : const LoginPage(),
-    );
+    Get.offAll(() => auth.isLoggedIn ? const HomePage() : const LoginPage());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
