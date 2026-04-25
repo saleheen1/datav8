@@ -1,13 +1,17 @@
 import 'dart:io';
 import 'package:datav8/core/db/response_model.dart';
 import 'package:datav8/core/network/connectivity_guard_service.dart';
+import 'package:datav8/core/storage/auth_storage.dart';
 import 'package:datav8/core/utils/snackbars.dart';
+import 'package:datav8/features/auth/data/controller/auth_controller.dart';
+import 'package:datav8/features/auth/presentation/login_page.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 class DbClient extends GetxService {
   late Dio instance;
+  bool _isHandlingAuthExpiry = false;
 
   void init() {
     instance = Dio(
@@ -19,6 +23,18 @@ class DbClient extends GetxService {
     );
     instance.interceptors.add(
       LogInterceptor(responseBody: true, requestBody: true),
+    );
+    instance.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (response, handler) async {
+          await _handleExpiredTokenPayloadIfAny(response.data);
+          handler.next(response);
+        },
+        onError: (error, handler) async {
+          await _handleExpiredTokenPayloadIfAny(error.response?.data);
+          handler.next(error);
+        },
+      ),
     );
   }
 
@@ -60,6 +76,32 @@ class DbClient extends GetxService {
       }
       debugPrint('[db_client.dart]: 🔥 EXCEPTION:: $e');
       return ResponseModel<T?>(false, e.toString(), null);
+    }
+  }
+
+  Future<void> _handleExpiredTokenPayloadIfAny(dynamic payload) async {
+    if (_isHandlingAuthExpiry) return;
+    if (payload is! Map) return;
+
+    final status = '${payload['status'] ?? ''}'.trim().toLowerCase();
+    final message = '${payload['message'] ?? ''}'.trim().toLowerCase();
+    final isExpiredToken =
+        status == 'failure' && message.contains('invalid imei token pair');
+    if (!isExpiredToken) return;
+
+    _isHandlingAuthExpiry = true;
+    try {
+      if (Get.isRegistered<AuthController>()) {
+        await Get.find<AuthController>().logout();
+        return;
+      }
+      if (Get.isRegistered<AuthStorage>()) {
+        await Get.find<AuthStorage>().clearUser();
+        await Get.find<AuthStorage>().clearCredentials();
+      }
+      Get.offAll(() => const LoginPage());
+    } finally {
+      _isHandlingAuthExpiry = false;
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:datav8/core/helper/common_helper.dart';
 import 'package:datav8/core/themes/custom_theme.dart';
+import 'package:datav8/core/utils/text_utils.dart';
 import 'package:datav8/core/widgets/appbar_common.dart';
 import 'package:datav8/features/auth/data/controller/auth_controller.dart';
 import 'package:datav8/features/home/data/controller/delete_old_data_controller.dart';
@@ -25,9 +26,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    final sensorDropdownController = Get.find<SetHardwareSensorDropdownController>();
+    final sensorDropdownController =
+        Get.find<SetHardwareSensorDropdownController>();
     final setAlarmsController = Get.find<SetAlarmsController>();
-    final setHardwareConfigController = Get.find<SetHardwareConfigurationsController>();
+    final setHardwareConfigController =
+        Get.find<SetHardwareConfigurationsController>();
     final deleteOldDataController = Get.find<DeleteOldDataController>();
 
     sensorDropdownController.initializeForHome();
@@ -46,7 +49,25 @@ class _HomePageState extends State<HomePage> {
         return GestureDetector(
           onTap: () => hideKeyboard(context),
           child: Scaffold(
-            appBar: appbarCommon('DataV8', hasBackButton: false, context),
+            appBar: appbarCommon(
+              'DataV8',
+              hasBackButton: false,
+              context,
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await ac.logout();
+                  },
+                  child: Text(
+                    'Logout',
+                    style: TextUtils.b1SemiBold(
+                      context: context,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             body: Container(
               color: theme.greyBg,
               margin: EdgeInsets.only(bottom: 50),
