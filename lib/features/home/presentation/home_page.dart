@@ -40,7 +40,7 @@ class HomePage extends StatelessWidget {
                           Tab(text: 'View data'),
                           Tab(text: 'Set alarms'),
                           Tab(text: 'Logger setup'),
-                          Tab(text: 'Delete old data'),
+                          Tab(text: 'Clear old data'),
                         ],
                       ),
                     ),
