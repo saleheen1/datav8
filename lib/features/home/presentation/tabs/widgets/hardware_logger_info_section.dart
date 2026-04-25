@@ -11,14 +11,20 @@ class HardwareLoggerInfoSection extends StatelessWidget {
     required this.loggerNameController,
     required this.locationController,
     required this.onSavePressed,
+    this.onNoAccessPressed,
     this.isSaving = false,
+    this.canSave = true,
+    this.isAccessLoading = false,
   });
 
   final TextEditingController ownerController;
   final TextEditingController loggerNameController;
   final TextEditingController locationController;
   final VoidCallback onSavePressed;
+  final VoidCallback? onNoAccessPressed;
   final bool isSaving;
+  final bool canSave;
+  final bool isAccessLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +69,14 @@ class HardwareLoggerInfoSection extends StatelessWidget {
           gapH(24),
           ButtonPrimary(
             text: 'Save logger info',
-            onPressed: onSavePressed,
+            onPressed: isAccessLoading
+                ? () {}
+                : (canSave ? onSavePressed : (onNoAccessPressed ?? () {})),
             width: 180,
             borderRadius: 5,
             boxshadow: false,
-            isLoading: isSaving,
+            bgColor: canSave ? null : Colors.grey,
+            isLoading: isSaving || isAccessLoading,
           ),
         ],
       ),

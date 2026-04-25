@@ -42,7 +42,7 @@ class DeleteOldDataController extends GetxController {
     update();
   }
 
-  String? get _selectedImeiRaw {
+  String? get selectedImeiRaw {
     if (selectedDeviceTitle == null) return null;
     for (final d in devices) {
       if (d.title == selectedDeviceTitle) return d.imeiRaw;
@@ -55,7 +55,7 @@ class DeleteOldDataController extends GetxController {
   Future<void> deleteDataBeforeSelectedTime() async {
     if (isDeleting) return;
     final token = _authStorage.readUser()?.token?.trim() ?? '';
-    final imei = _selectedImeiRaw?.trim() ?? '';
+    final imei = selectedImeiRaw?.trim() ?? '';
     if (token.isEmpty || imei.isEmpty) {
       showErrorSnackbar(
         'Delete failed',

@@ -1,6 +1,8 @@
 import 'package:datav8/core/utils/ui_const.dart';
+import 'package:datav8/core/utils/snackbars.dart';
 import 'package:datav8/core/widgets/button_primary.dart';
 import 'package:datav8/core/widgets/custom_dropdown.dart';
+import 'package:datav8/features/home/data/controller/device_access_controller.dart';
 import 'package:datav8/features/home/data/controller/set_alarms_controller.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/alarm_channel_section.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/alarm_channel_section_skeleton.dart';
@@ -24,11 +26,17 @@ class SetAlarmsTab extends StatelessWidget {
       autoRemove: true,
       assignId: true,
       builder: (c) {
-        return Container(
-          color: Colors.white,
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
+        final imei = c.selectedImeiRaw ?? '';
+        return GetBuilder<DeviceAccessController>(
+          builder: (ac) {
+            ac.ensureAccessLoaded(imei);
+            final canSaveAlarm = ac.canSetAlarm(imei);
+            final isAccessLoading = ac.isLoadingForImei(imei);
+            return Container(
+              color: Colors.white,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
               //===============================
               //Select device
               //===============================
@@ -102,11 +110,22 @@ class SetAlarmsTab extends StatelessWidget {
                         gapH(30),
                         ButtonPrimary(
                           text: 'Save channel ${i + 1}',
-                          onPressed: () => c.saveChannel(i),
+                          onPressed: () {
+                            if (isAccessLoading) return;
+                            if (!canSaveAlarm) {
+                              showAlertSnackbar(
+                                'Access denied',
+                                "You don't have access to set this data",
+                              );
+                              return;
+                            }
+                            c.saveChannel(i);
+                          },
                           width: 160,
                           borderRadius: 5,
                           boxshadow: false,
-                          isLoading: c.isSavingChannel[i],
+                          bgColor: canSaveAlarm ? null : Colors.grey,
+                          isLoading: c.isSavingChannel[i] || isAccessLoading,
                         ),
                       ],
                     ),
@@ -118,8 +137,10 @@ class SetAlarmsTab extends StatelessWidget {
                   const Divider(color: Colors.black12, thickness: 1),
                   const SizedBox(height: 26),
                 ],
-            ],
-          ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

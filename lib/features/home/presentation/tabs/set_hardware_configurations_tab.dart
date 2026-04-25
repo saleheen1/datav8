@@ -1,10 +1,12 @@
 import 'package:datav8/core/utils/text_utils.dart';
 import 'package:datav8/core/utils/ui_const.dart';
+import 'package:datav8/core/utils/snackbars.dart';
 import 'package:datav8/core/widgets/button_primary.dart';
 import 'package:datav8/core/widgets/custom_checkbox.dart';
 import 'package:datav8/core/widgets/custom_dropdown.dart';
 import 'package:datav8/core/widgets/custom_input.dart';
 import 'package:datav8/core/widgets/show_image.dart';
+import 'package:datav8/features/home/data/controller/device_access_controller.dart';
 import 'package:datav8/features/home/data/controller/set_hardware_configurations_controller.dart';
 import 'package:datav8/features/home/data/controller/set_hardware_sensor_dropdown_controller.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/hardware_logger_info_section.dart';
@@ -22,11 +24,17 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
       builder: (c) {
         return GetBuilder<SetHardwareSensorDropdownController>(
           builder: (s) {
-            return Container(
-              color: Colors.white,
-              child: ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
+            final imei = c.selectedImeiRaw ?? '';
+            return GetBuilder<DeviceAccessController>(
+              builder: (ac) {
+                ac.ensureAccessLoaded(imei);
+                final canSetHardware = ac.canSetHardware(imei);
+                final isAccessLoading = ac.isLoadingForImei(imei);
+                return Container(
+                  color: Colors.white,
+                  child: ListView(
+                    padding: const EdgeInsets.all(20),
+                    children: [
                   //===============================
                   //Select device
                   //===============================
@@ -58,7 +66,13 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
                           loggerNameController: c.loggerNameController,
                           locationController: c.locationController,
                           onSavePressed: c.saveLoggerInfo,
+                          onNoAccessPressed: () => showAlertSnackbar(
+                            'Access denied',
+                            "You don't have access to set this data",
+                          ),
                           isSaving: c.isSavingLoggerInfo,
+                          canSave: canSetHardware,
+                          isAccessLoading: isAccessLoading,
                         ),
 
                   //===============================
@@ -140,18 +154,31 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
                         c.isChannelConfigLoaded[i])
                       ButtonPrimary(
                         text: 'Save channel ${i + 1}',
-                        onPressed: () => c.saveChannel(i),
+                        onPressed: () {
+                          if (isAccessLoading) return;
+                          if (!canSetHardware) {
+                            showAlertSnackbar(
+                              'Access denied',
+                              "You don't have access to set this data",
+                            );
+                            return;
+                          }
+                          c.saveChannel(i);
+                        },
                         width: 160,
                         borderRadius: 5,
                         boxshadow: false,
-                        isLoading: c.isSavingChannel[i],
+                        bgColor: canSetHardware ? null : Colors.grey,
+                        isLoading: c.isSavingChannel[i] || isAccessLoading,
                       ),
                     const SizedBox(height: 26),
                     const Divider(color: Colors.black12, thickness: 1),
                     const SizedBox(height: 26),
                   ],
-                ],
-              ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         );

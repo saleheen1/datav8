@@ -5,10 +5,12 @@ import 'package:datav8/features/auth/data/repo/auth_repo.dart';
 import 'package:datav8/features/duration/data/chart_controller.dart';
 import 'package:datav8/features/duration/data/controller/duration_pick_controller.dart';
 import 'package:datav8/features/duration/data/repo/chart_repo.dart';
+import 'package:datav8/features/home/data/controller/device_access_controller.dart';
 import 'package:datav8/features/home/data/controller/delete_old_data_controller.dart';
 import 'package:datav8/features/home/data/controller/set_alarms_controller.dart';
 import 'package:datav8/features/home/data/controller/set_hardware_configurations_controller.dart';
 import 'package:datav8/features/home/data/controller/set_hardware_sensor_dropdown_controller.dart';
+import 'package:datav8/features/home/data/repo/device_access_repo.dart';
 import 'package:datav8/features/home/data/repo/delete_old_data_repo.dart';
 import 'package:datav8/features/home/data/repo/hardware_sensor_repo.dart';
 import 'package:datav8/features/home/data/repo/set_alarms_repo.dart';
@@ -25,11 +27,13 @@ Future<void> initBindings() async {
 
   Get.lazyPut(() => AuthRepo(), fenix: true);
   Get.lazyPut(() => ChartRepo(), fenix: true);
+  Get.lazyPut(() => DeviceAccessRepo(), fenix: true);
   Get.lazyPut(() => DeleteOldDataRepo(), fenix: true);
   Get.lazyPut(() => SetAlarmsRepo(), fenix: true);
   Get.lazyPut(() => HardwareSensorRepo(), fenix: true);
   Get.lazyPut(() => SetHardwareConfigurationsRepo(), fenix: true);
   Get.put(AuthController());
+  Get.put(DeviceAccessController());
   Get.put(DurationPickController());
   Get.put(ChartController());
   Get.lazyPut(() => DeleteOldDataController(), fenix: true);
