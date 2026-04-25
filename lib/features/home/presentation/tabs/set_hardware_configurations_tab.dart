@@ -10,6 +10,7 @@ import 'package:datav8/features/home/data/controller/device_access_controller.da
 import 'package:datav8/features/home/data/controller/set_hardware_configurations_controller.dart';
 import 'package:datav8/features/home/data/controller/set_hardware_sensor_dropdown_controller.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/hardware_logger_info_section.dart';
+import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/dropdown_saving_skeleton.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/hardware_channel_section_skeleton.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/hardware_logger_info_skeleton.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SetHardwareConfigurationsController>(
+      autoRemove: false,
       builder: (c) {
         return GetBuilder<SetHardwareSensorDropdownController>(
           builder: (s) {
@@ -30,6 +32,9 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
                 ac.ensureAccessLoaded(imei);
                 final canSetHardware = ac.canSetHardware(imei);
                 final isAccessLoading = ac.isLoadingForImei(imei);
+                final isSavingAnyData =
+                    c.isSavingLoggerInfo ||
+                    c.isSavingChannel.any((isSaving) => isSaving);
                 return Container(
                   color: Colors.white,
                   child: ListView(
@@ -44,14 +49,16 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 34),
                     child: Column(
                       children: [
-                        CustomDropDown(
-                          label: 'Select device',
-                          items: c.devices.map((d) => d.title).toList(),
-                          value: c.selectedDeviceTitle,
-                          onChange: c.setSelectedDevice,
-                          borderColor: Colors.black26,
-                          bgColor: Colors.white,
-                        ),
+                        isSavingAnyData
+                            ? const DropdownSavingSkeleton()
+                            : CustomDropDown(
+                                label: 'Select device',
+                                items: c.devices.map((d) => d.title).toList(),
+                                value: c.selectedDeviceTitle,
+                                onChange: c.setSelectedDevice,
+                                borderColor: Colors.black26,
+                                bgColor: Colors.white,
+                              ),
                       ],
                     ),
                   ),

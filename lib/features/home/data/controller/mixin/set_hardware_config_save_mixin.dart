@@ -18,6 +18,7 @@ mixin SetHardwareConfigSaveMixin {
   TextEditingController get ownerController;
   TextEditingController get loggerNameController;
   TextEditingController get locationController;
+  void saveCurrentConfigToCacheForSelectedDevice();
 
   Future<void> saveChannel(int index) async {
     if (isSavingChannel[index]) return;
@@ -71,6 +72,7 @@ mixin SetHardwareConfigSaveMixin {
       }
     }
     isSavingChannel[index] = false;
+    saveCurrentConfigToCacheForSelectedDevice();
     update();
     showSuccessSnackbar('Saved', 'Channel $channel hardware settings saved');
   }
@@ -115,6 +117,7 @@ mixin SetHardwareConfigSaveMixin {
       }
     }
     isSavingLoggerInfo = false;
+    saveCurrentConfigToCacheForSelectedDevice();
     update();
     showSuccessSnackbar('Saved', 'Logger info saved');
   }

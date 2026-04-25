@@ -22,8 +22,16 @@ mixin SetAlarmsFetchMixin {
   late List<bool> isChannelConfigLoaded;
   CancelToken? _activeFetchCancelToken;
   int _activeFetchRunId = 0;
+  final Map<String, _SetAlarmDeviceCache> _deviceConfigCache = {};
 
   void initFetchState() {
+    isChannelConfigLoading = List<bool>.filled(totalChannels, false);
+    isChannelConfigLoaded = List<bool>.filled(totalChannels, false);
+  }
+
+  void clearAlarmConfigCache() {
+    _deviceConfigCache.clear();
+    isFetchingAlarmConfig = false;
     isChannelConfigLoading = List<bool>.filled(totalChannels, false);
     isChannelConfigLoaded = List<bool>.filled(totalChannels, false);
   }
@@ -47,6 +55,8 @@ mixin SetAlarmsFetchMixin {
     final token = authStorage.readUser()?.token?.trim() ?? '';
     final imei = selectedImeiRaw?.trim() ?? '';
     if (token.isEmpty || imei.isEmpty) return;
+    _applyCachedConfig(imei);
+    if (isChannelConfigLoaded.every((loaded) => loaded)) return;
 
     final runId = _activeFetchRunId;
     final cancelToken = CancelToken();
@@ -54,7 +64,6 @@ mixin SetAlarmsFetchMixin {
 
     isFetchingAlarmConfig = true;
     isChannelConfigLoading = List<bool>.filled(totalChannels, false);
-    isChannelConfigLoaded = List<bool>.filled(totalChannels, false);
     update();
 
     final params = [
@@ -66,6 +75,7 @@ mixin SetAlarmsFetchMixin {
     ];
 
     for (var i = 0; i < totalChannels; i++) {
+      if (isChannelConfigLoaded[i]) continue;
       final channel = i + 1;
       isChannelConfigLoading[i] = true;
       update();
@@ -120,6 +130,9 @@ mixin SetAlarmsFetchMixin {
 
       isChannelConfigLoading[i] = false;
       isChannelConfigLoaded[i] = channelLoaded;
+      if (channelLoaded) {
+        _saveCurrentToCache(imei);
+      }
       update();
 
       if (!channelLoaded) {
@@ -132,6 +145,93 @@ mixin SetAlarmsFetchMixin {
     if (runId != _activeFetchRunId) return;
     _activeFetchCancelToken = null;
     isFetchingAlarmConfig = false;
+    _saveCurrentToCache(imei);
     update();
   }
+
+  void _applyCachedConfig(String imei) {
+    final cached = _deviceConfigCache[imei];
+    isChannelConfigLoaded = List<bool>.filled(totalChannels, false);
+    if (cached == null) return;
+
+    for (var i = 0; i < totalChannels; i++) {
+      final isLoaded = cached.channelLoaded[i];
+      isChannelConfigLoaded[i] = isLoaded;
+      if (!isLoaded) continue;
+      isAlarmActive[i] = cached.isAlarmActive[i];
+      sendHourlyAlarm[i] = cached.sendHourlyAlarm[i];
+      upperLimitControllers[i].text = cached.upperLimits[i];
+      lowerLimitControllers[i].text = cached.lowerLimits[i];
+      holdoffControllers[i].text = cached.holdoffs[i];
+      isChannelConfigLoading[i] = false;
+    }
+
+    isFetchingAlarmConfig = false;
+    update();
+  }
+
+  void saveCurrentConfigToCacheForSelectedDevice() {
+    final imei = selectedImeiRaw?.trim() ?? '';
+    if (imei.isEmpty) return;
+    _saveCurrentToCache(imei);
+  }
+
+  void _saveCurrentToCache(String imei) {
+    final existing = _deviceConfigCache[imei];
+    final channelLoaded = existing != null
+        ? List<bool>.from(existing.channelLoaded)
+        : List<bool>.filled(totalChannels, false);
+    final alarmActive = existing != null
+        ? List<bool>.from(existing.isAlarmActive)
+        : List<bool>.filled(totalChannels, true);
+    final hourlyAlarm = existing != null
+        ? List<bool>.from(existing.sendHourlyAlarm)
+        : List<bool>.filled(totalChannels, true);
+    final upperLimits = existing != null
+        ? List<String>.from(existing.upperLimits)
+        : List<String>.filled(totalChannels, '13');
+    final lowerLimits = existing != null
+        ? List<String>.from(existing.lowerLimits)
+        : List<String>.filled(totalChannels, '12');
+    final holdoffs = existing != null
+        ? List<String>.from(existing.holdoffs)
+        : List<String>.filled(totalChannels, '2');
+
+    for (var i = 0; i < totalChannels; i++) {
+      if (!isChannelConfigLoaded[i]) continue;
+      channelLoaded[i] = true;
+      alarmActive[i] = isAlarmActive[i];
+      hourlyAlarm[i] = sendHourlyAlarm[i];
+      upperLimits[i] = upperLimitControllers[i].text.trim();
+      lowerLimits[i] = lowerLimitControllers[i].text.trim();
+      holdoffs[i] = holdoffControllers[i].text.trim();
+    }
+
+    _deviceConfigCache[imei] = _SetAlarmDeviceCache(
+      channelLoaded: channelLoaded,
+      isAlarmActive: alarmActive,
+      sendHourlyAlarm: hourlyAlarm,
+      upperLimits: upperLimits,
+      lowerLimits: lowerLimits,
+      holdoffs: holdoffs,
+    );
+  }
+}
+
+class _SetAlarmDeviceCache {
+  _SetAlarmDeviceCache({
+    required this.channelLoaded,
+    required this.isAlarmActive,
+    required this.sendHourlyAlarm,
+    required this.upperLimits,
+    required this.lowerLimits,
+    required this.holdoffs,
+  });
+
+  final List<bool> channelLoaded;
+  final List<bool> isAlarmActive;
+  final List<bool> sendHourlyAlarm;
+  final List<String> upperLimits;
+  final List<String> lowerLimits;
+  final List<String> holdoffs;
 }

@@ -16,6 +16,7 @@ mixin SetAlarmsSaveMixin {
   String? get selectedImeiRaw;
 
   void setChannelSaving(int index, bool value);
+  void saveCurrentConfigToCacheForSelectedDevice();
 
   Future<void> saveChannel(int index) async {
     if (isSavingChannel[index]) return;
@@ -62,6 +63,7 @@ mixin SetAlarmsSaveMixin {
       }
     }
     setChannelSaving(index, false);
+    saveCurrentConfigToCacheForSelectedDevice();
     showSuccessSnackbar('Saved', 'Channel $channel alarm settings saved');
   }
 }

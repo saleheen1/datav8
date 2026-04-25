@@ -6,6 +6,7 @@ import 'package:datav8/core/widgets/custom_dropdown.dart';
 import 'package:datav8/features/home/data/controller/device_access_controller.dart';
 import 'package:datav8/features/home/data/controller/delete_old_data_controller.dart';
 import 'package:datav8/features/home/presentation/tabs/widgets/delete_old_data_date_time_section.dart';
+import 'package:datav8/features/home/presentation/tabs/widgets/skeleton/dropdown_saving_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,14 +33,16 @@ class DeleteOldDataTab extends StatelessWidget {
                     color: Colors.grey[100],
                     padding: const EdgeInsets.all(20),
                     margin: const EdgeInsets.only(bottom: 24),
-                    child: CustomDropDown(
-                      label: 'Select device',
-                      items: c.devices.map((d) => d.title).toList(),
-                      value: c.selectedDeviceTitle,
-                      onChange: c.setSelectedDevice,
-                      borderColor: Colors.black26,
-                      bgColor: Colors.white,
-                    ),
+                    child: c.isDeleting
+                        ? const DropdownSavingSkeleton()
+                        : CustomDropDown(
+                            label: 'Select device',
+                            items: c.devices.map((d) => d.title).toList(),
+                            value: c.selectedDeviceTitle,
+                            onChange: c.setSelectedDevice,
+                            borderColor: Colors.black26,
+                            bgColor: Colors.white,
+                          ),
                   ),
                   Text(
                     'Clear Data before Date:',

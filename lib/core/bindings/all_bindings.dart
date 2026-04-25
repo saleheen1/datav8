@@ -28,6 +28,7 @@ Future<void> initBindings() async {
   Get.put(ConnectivityGuardService());
 
   Get.lazyPut(() => AuthRepo(), fenix: true);
+  Get.lazyPut(() => SetHardwareSensorDropdownController(), fenix: true);
   Get.lazyPut(() => ChartRepo(), fenix: true);
   Get.lazyPut(() => DeviceAccessRepo(), fenix: true);
   Get.lazyPut(() => DeleteOldDataRepo(), fenix: true);
@@ -39,7 +40,6 @@ Future<void> initBindings() async {
   Get.put(DurationPickController());
   Get.put(ChartController());
   Get.lazyPut(() => DeleteOldDataController(), fenix: true);
-  Get.lazyPut(() => SetAlarmsController(), fenix: true);
-  Get.lazyPut(() => SetHardwareConfigurationsController(), fenix: true);
-  Get.lazyPut(() => SetHardwareSensorDropdownController(), fenix: true);
+  Get.put(SetAlarmsController());
+  Get.put(SetHardwareConfigurationsController());
 }

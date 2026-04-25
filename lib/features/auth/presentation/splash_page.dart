@@ -1,6 +1,8 @@
 import 'package:datav8/core/widgets/logo_widget.dart';
 import 'package:datav8/features/auth/data/controller/auth_controller.dart';
 import 'package:datav8/features/auth/presentation/login_page.dart';
+import 'package:datav8/features/home/data/controller/set_alarms_controller.dart';
+import 'package:datav8/features/home/data/controller/set_hardware_configurations_controller.dart';
 import 'package:datav8/features/home/presentation/home_page.dart';
 import 'package:datav8/core/network/connectivity_guard_service.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,9 @@ class _SplashPageState extends State<SplashPage> {
       await connectivityGuard.takeUserToNoInternetPage();
       return;
     }
+
+    Get.find<SetAlarmsController>().clearAlarmConfigCache();
+    Get.find<SetHardwareConfigurationsController>().clearHardwareConfigCache();
 
     final auth = Get.find<AuthController>();
     await auth.restoreSessionIfAny();

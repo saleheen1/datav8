@@ -27,6 +27,18 @@ mixin SetHardwareConfigFetchMixin {
 
   int _loadRunId = 0;
   CancelToken? _activeLoadCancelToken;
+  final Map<String, _HardwareConfigDeviceCache> _deviceConfigCache = {};
+
+  void clearHardwareConfigCache() {
+    _deviceConfigCache.clear();
+    isLoadingConfig = false;
+    isLoggerInfoLoading = false;
+    isLoggerInfoLoaded = false;
+    for (var i = 0; i < totalChannels; i++) {
+      isChannelConfigLoading[i] = false;
+      isChannelConfigLoaded[i] = false;
+    }
+  }
 
   void cancelConfigLoading({bool notify = true}) {
     _activeLoadCancelToken?.cancel('Device changed');
@@ -48,6 +60,8 @@ mixin SetHardwareConfigFetchMixin {
     final token = authToken.trim();
     final imei = selectedImeiRaw?.trim() ?? '';
     if (token.isEmpty || imei.isEmpty) return;
+    _applyCachedConfig(imei);
+    final shouldLoadLoggerInfo = !isLoggerInfoLoaded;
 
     final cancelToken = CancelToken();
     _activeLoadCancelToken = cancelToken;
@@ -56,11 +70,9 @@ mixin SetHardwareConfigFetchMixin {
     }
 
     isLoadingConfig = true;
-    isLoggerInfoLoading = true;
-    isLoggerInfoLoaded = false;
+    isLoggerInfoLoading = shouldLoadLoggerInfo;
     for (var i = 0; i < totalChannels; i++) {
       isChannelConfigLoading[i] = false;
-      isChannelConfigLoaded[i] = false;
     }
     update();
 
@@ -76,30 +88,36 @@ mixin SetHardwareConfigFetchMixin {
       return response.data;
     }
 
-    final owner = await getParam('unit_owner');
-    if (runId != _loadRunId) {
-      isLoadingConfig = false;
-      return;
-    }
-    final unitName = await getParam('unit_name');
-    if (runId != _loadRunId) {
-      isLoadingConfig = false;
-      return;
-    }
-    final unitLocation = await getParam('unit_location');
-    if (runId != _loadRunId) {
-      isLoadingConfig = false;
-      return;
-    }
+    if (shouldLoadLoggerInfo) {
+      final owner = await getParam('unit_owner');
+      if (runId != _loadRunId) {
+        isLoadingConfig = false;
+        return;
+      }
+      final unitName = await getParam('unit_name');
+      if (runId != _loadRunId) {
+        isLoadingConfig = false;
+        return;
+      }
+      final unitLocation = await getParam('unit_location');
+      if (runId != _loadRunId) {
+        isLoadingConfig = false;
+        return;
+      }
 
-    ownerController.text = owner ?? '';
-    loggerNameController.text = unitName ?? '';
-    locationController.text = unitLocation ?? '';
-    isLoggerInfoLoading = false;
-    isLoggerInfoLoaded = true;
-    update();
+      ownerController.text = owner ?? '';
+      loggerNameController.text = unitName ?? '';
+      locationController.text = unitLocation ?? '';
+      isLoggerInfoLoading = false;
+      isLoggerInfoLoaded = owner != null && unitName != null && unitLocation != null;
+      if (isLoggerInfoLoaded) {
+        _saveCurrentToCache(imei);
+      }
+      update();
+    }
 
     for (var i = 0; i < totalChannels; i++) {
+      if (isChannelConfigLoaded[i]) continue;
       final ch = i + 1;
       isChannelConfigLoading[i] = true;
       update();
@@ -127,7 +145,11 @@ mixin SetHardwareConfigFetchMixin {
         notify: false,
       );
       isChannelConfigLoading[i] = false;
-      isChannelConfigLoaded[i] = true;
+      isChannelConfigLoaded[i] =
+          active != null && channelName != null && sensorType != null;
+      if (isChannelConfigLoaded[i]) {
+        _saveCurrentToCache(imei);
+      }
       update();
     }
 
@@ -135,6 +157,108 @@ mixin SetHardwareConfigFetchMixin {
     if (runId != _loadRunId) return;
     _activeLoadCancelToken = null;
     isLoadingConfig = false;
+    _saveCurrentToCache(imei);
     update();
   }
+
+  void saveCurrentConfigToCacheForSelectedDevice() {
+    final imei = selectedImeiRaw?.trim() ?? '';
+    if (imei.isEmpty) return;
+    _saveCurrentToCache(imei);
+  }
+
+  void _applyCachedConfig(String imei) {
+    final cached = _deviceConfigCache[imei];
+    if (cached == null) {
+      isLoggerInfoLoaded = false;
+      for (var i = 0; i < totalChannels; i++) {
+        isChannelConfigLoaded[i] = false;
+      }
+      return;
+    }
+
+    if (cached.isLoggerInfoLoaded) {
+      ownerController.text = cached.owner;
+      loggerNameController.text = cached.loggerName;
+      locationController.text = cached.location;
+      isLoggerInfoLoaded = true;
+      isLoggerInfoLoading = false;
+    } else {
+      isLoggerInfoLoaded = false;
+    }
+
+    for (var i = 0; i < totalChannels; i++) {
+      final loaded = cached.channelLoaded[i];
+      isChannelConfigLoaded[i] = loaded;
+      if (!loaded) continue;
+      channelInUse[i] = cached.channelInUse[i];
+      channelNameControllers[i].text = cached.channelNames[i];
+      sensorDropdownController.setSelectedBySensorType(
+        i,
+        cached.sensorTypes[i],
+        notify: false,
+      );
+    }
+
+    sensorDropdownController.update();
+    update();
+  }
+
+  void _saveCurrentToCache(String imei) {
+    final existing = _deviceConfigCache[imei];
+    final channelLoaded = existing != null
+        ? List<bool>.from(existing.channelLoaded)
+        : List<bool>.filled(totalChannels, false);
+    final channelUse = existing != null
+        ? List<bool>.from(existing.channelInUse)
+        : List<bool>.filled(totalChannels, true);
+    final channelNames = existing != null
+        ? List<String>.from(existing.channelNames)
+        : List<String>.filled(totalChannels, '');
+    final sensorTypes = existing != null
+        ? List<String>.from(existing.sensorTypes)
+        : List<String>.filled(totalChannels, '');
+
+    for (var i = 0; i < totalChannels; i++) {
+      if (!isChannelConfigLoaded[i]) continue;
+      channelLoaded[i] = true;
+      channelUse[i] = channelInUse[i];
+      channelNames[i] = channelNameControllers[i].text.trim();
+      sensorTypes[i] =
+          sensorDropdownController.selectedForChannel(i)?.boardName ?? '';
+    }
+
+    _deviceConfigCache[imei] = _HardwareConfigDeviceCache(
+      isLoggerInfoLoaded: isLoggerInfoLoaded,
+      owner: ownerController.text.trim(),
+      loggerName: loggerNameController.text.trim(),
+      location: locationController.text.trim(),
+      channelLoaded: channelLoaded,
+      channelInUse: channelUse,
+      channelNames: channelNames,
+      sensorTypes: sensorTypes,
+    );
+  }
+}
+
+class _HardwareConfigDeviceCache {
+  _HardwareConfigDeviceCache({
+    required this.isLoggerInfoLoaded,
+    required this.owner,
+    required this.loggerName,
+    required this.location,
+    required this.channelLoaded,
+    required this.channelInUse,
+    required this.channelNames,
+    required this.sensorTypes,
+  });
+
+  final bool isLoggerInfoLoaded;
+  final String owner;
+  final String loggerName;
+  final String location;
+  final List<bool> channelLoaded;
+  final List<bool> channelInUse;
+  final List<String> channelNames;
+  final List<String> sensorTypes;
 }
