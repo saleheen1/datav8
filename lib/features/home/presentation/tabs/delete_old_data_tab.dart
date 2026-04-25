@@ -59,7 +59,7 @@ class DeleteOldDataTab extends StatelessWidget {
                       if (!canDelete) {
                         showAlertSnackbar(
                           'Access denied',
-                          "You don't have access to set this data",
+                          "You don't have access to delete data for this device",
                         );
                         return;
                       }

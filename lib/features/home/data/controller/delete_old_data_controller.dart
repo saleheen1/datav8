@@ -13,6 +13,7 @@ class DeleteOldDataController extends GetxController {
   DateTime selectedDateTime = DateTime.now().subtract(const Duration(hours: 1));
   bool isDeleting = false;
   bool _isInitialized = false;
+  static const Color _pickerBlue = Colors.blue;
 
   void initializeForHome() {
     if (_isInitialized) return;
@@ -52,7 +53,8 @@ class DeleteOldDataController extends GetxController {
     return null;
   }
 
-  int get selectedEpochSeconds => selectedDateTime.millisecondsSinceEpoch ~/ 1000;
+  int get selectedEpochSeconds =>
+      selectedDateTime.millisecondsSinceEpoch ~/ 1000;
 
   Future<void> deleteDataBeforeSelectedTime() async {
     if (isDeleting) return;
@@ -95,6 +97,24 @@ class DeleteOldDataController extends GetxController {
       initialDate: selectedDateTime,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: _pickerBlue,
+              secondary: _pickerBlue,
+              surface: Colors.white,
+              brightness: Brightness.light,
+            ),
+            datePickerTheme: const DatePickerThemeData(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.white,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.white),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked == null) return;
     selectedDateTime = DateTime(
@@ -111,6 +131,23 @@ class DeleteOldDataController extends GetxController {
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: _pickerBlue,
+              secondary: _pickerBlue,
+            ),
+            timePickerTheme: const TimePickerThemeData(
+              hourMinuteColor: Color.fromARGB(255, 244, 244, 244),
+              dayPeriodColor: Color.fromARGB(255, 244, 244, 244),
+              backgroundColor: Colors.white,
+              dialBackgroundColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked == null) return;
     selectedDateTime = DateTime(

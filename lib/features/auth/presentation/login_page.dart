@@ -75,13 +75,13 @@ class LoginPage extends StatelessWidget {
 
                       gapH(25),
 
-                      AuthBottomText(
-                        mainText: 'Don’t have an account?  ',
-                        actionText: 'Register',
-                        onTap: () {
-                          Get.to(() => SignUpPage());
-                        },
-                      ),
+                      // AuthBottomText(
+                      //   mainText: 'Don’t have an account?  ',
+                      //   actionText: 'Register',
+                      //   onTap: () {
+                      //     Get.to(() => SignUpPage());
+                      //   },
+                      // ),
                     ],
                   ),
                 ),

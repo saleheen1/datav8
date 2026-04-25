@@ -14,6 +14,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  static const Color _appBlue = Color(0xff1999FA);
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +23,22 @@ class MyApp extends StatelessWidget {
       child: GetMaterialApp(
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: _appBlue),
+          primaryColor: _appBlue,
+          dialogTheme: const DialogThemeData(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+          ),
+          datePickerTheme: const DatePickerThemeData(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+          ),
+          timePickerTheme: const TimePickerThemeData(
+            backgroundColor: Colors.white,
+            dialBackgroundColor: Colors.white,
+          ),
+        ),
         home: const SplashPage(),
       ),
     );
