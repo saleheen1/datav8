@@ -25,6 +25,7 @@ class HomePage extends StatelessWidget {
             appBar: appbarCommon('DataV8', hasBackButton: false, context),
             body: Container(
               color: theme.greyBg,
+              margin: EdgeInsets.only(bottom: 50),
               child: DefaultTabController(
                 length: 4,
                 child: Column(

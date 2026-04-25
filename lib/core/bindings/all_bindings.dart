@@ -1,4 +1,5 @@
 import 'package:datav8/core/db/db_client.dart';
+import 'package:datav8/core/network/connectivity_guard_service.dart';
 import 'package:datav8/core/storage/auth_storage.dart';
 import 'package:datav8/features/auth/data/controller/auth_controller.dart';
 import 'package:datav8/features/auth/data/repo/auth_repo.dart';
@@ -24,6 +25,7 @@ Future<void> initBindings() async {
 
   final dbClient = Get.put(DbClient());
   dbClient.init();
+  Get.put(ConnectivityGuardService());
 
   Get.lazyPut(() => AuthRepo(), fenix: true);
   Get.lazyPut(() => ChartRepo(), fenix: true);

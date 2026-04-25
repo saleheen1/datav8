@@ -2,6 +2,7 @@ import 'package:datav8/core/widgets/logo_widget.dart';
 import 'package:datav8/features/auth/data/controller/auth_controller.dart';
 import 'package:datav8/features/auth/presentation/login_page.dart';
 import 'package:datav8/features/home/presentation/home_page.dart';
+import 'package:datav8/core/network/connectivity_guard_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,6 +23,14 @@ class _SplashPageState extends State<SplashPage> {
   Future<void> _boot() async {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
+
+    final connectivityGuard = Get.find<ConnectivityGuardService>();
+    final isConnected = await connectivityGuard.hasInternetConnection();
+    if (!isConnected) {
+      await connectivityGuard.takeUserToNoInternetPage();
+      return;
+    }
+
     final auth = Get.find<AuthController>();
     await auth.restoreSessionIfAny();
     if (!mounted) return;

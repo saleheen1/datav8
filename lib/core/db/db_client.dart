@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:datav8/core/db/response_model.dart';
+import 'package:datav8/core/network/connectivity_guard_service.dart';
 import 'package:datav8/core/utils/snackbars.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -26,6 +27,13 @@ class DbClient extends GetxService {
     required String functionName,
   }) async {
     try {
+      final connectivityGuard = Get.find<ConnectivityGuardService>();
+      final isConnected = await connectivityGuard.hasInternetConnection();
+      if (!isConnected) {
+        await connectivityGuard.takeUserToNoInternetPage();
+        return ResponseModel<T?>(false, 'No internet connection', null);
+      }
+
       return await run();
     } on Map catch (e) {
       return ResponseModel<T?>(false, e['message'], null);
