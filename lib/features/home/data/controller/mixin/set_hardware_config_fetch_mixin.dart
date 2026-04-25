@@ -29,7 +29,21 @@ mixin SetHardwareConfigFetchMixin {
   CancelToken? _activeLoadCancelToken;
   final Map<String, _HardwareConfigDeviceCache> _deviceConfigCache = {};
 
+  void _ensureChannelListsInitialized() {
+    if (isChannelConfigLoading.length != totalChannels) {
+      isChannelConfigLoading
+        ..clear()
+        ..addAll(List<bool>.filled(totalChannels, false));
+    }
+    if (isChannelConfigLoaded.length != totalChannels) {
+      isChannelConfigLoaded
+        ..clear()
+        ..addAll(List<bool>.filled(totalChannels, false));
+    }
+  }
+
   void clearHardwareConfigCache() {
+    _ensureChannelListsInitialized();
     _deviceConfigCache.clear();
     isLoadingConfig = false;
     isLoggerInfoLoading = false;
@@ -41,6 +55,7 @@ mixin SetHardwareConfigFetchMixin {
   }
 
   void cancelConfigLoading({bool notify = true}) {
+    _ensureChannelListsInitialized();
     _activeLoadCancelToken?.cancel('Device changed');
     _activeLoadCancelToken = null;
     _loadRunId++;
@@ -55,6 +70,7 @@ mixin SetHardwareConfigFetchMixin {
   }
 
   Future<void> loadSelectedDeviceConfig() async {
+    _ensureChannelListsInitialized();
     cancelConfigLoading();
     final runId = _loadRunId;
     final token = authToken.trim();

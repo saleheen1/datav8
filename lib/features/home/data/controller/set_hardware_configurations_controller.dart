@@ -37,9 +37,11 @@ class SetHardwareConfigurationsController extends GetxController
   @override
   String get authToken => authStorage.readUser()?.token?.trim() ?? '';
 
-  @override
-  void onInit() {
-    super.onInit();
+  bool _isInitialized = false;
+
+  void initializeForHome() {
+    if (_isInitialized) return;
+    _isInitialized = true;
     initDevices();
     initFormState();
     Future.microtask(loadSelectedDeviceConfig);

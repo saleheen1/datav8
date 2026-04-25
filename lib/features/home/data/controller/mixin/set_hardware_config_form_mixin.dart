@@ -8,11 +8,12 @@ mixin SetHardwareConfigFormMixin {
   final loggerNameController = TextEditingController();
   final locationController = TextEditingController();
 
-  late List<bool> channelInUse;
-  late List<bool> isSavingChannel;
-  late List<bool> isChannelConfigLoading;
-  late List<bool> isChannelConfigLoaded;
-  late List<TextEditingController> channelNameControllers;
+  List<bool> channelInUse = <bool>[];
+  List<bool> isSavingChannel = <bool>[];
+  List<bool> isChannelConfigLoading = <bool>[];
+  List<bool> isChannelConfigLoaded = <bool>[];
+  List<TextEditingController> channelNameControllers =
+      <TextEditingController>[];
 
   bool isLoadingConfig = false;
   bool isLoggerInfoLoading = false;

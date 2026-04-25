@@ -20,9 +20,11 @@ class SetAlarmsController extends GetxController
   @override
   final AuthStorage authStorage = Get.find<AuthStorage>();
 
-  @override
-  void onInit() {
-    super.onInit();
+  bool _isInitialized = false;
+
+  void initializeForHome() {
+    if (_isInitialized) return;
+    _isInitialized = true;
     initDevices();
     initChannelFormState();
     initFetchState();

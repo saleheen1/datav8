@@ -12,11 +12,13 @@ class DeleteOldDataController extends GetxController {
   String? selectedDeviceTitle;
   DateTime selectedDateTime = DateTime.now().subtract(const Duration(hours: 1));
   bool isDeleting = false;
+  bool _isInitialized = false;
 
-  @override
-  void onInit() {
-    super.onInit();
+  void initializeForHome() {
+    if (_isInitialized) return;
+    _isInitialized = true;
     _initDevices();
+    update();
   }
 
   void _initDevices() {

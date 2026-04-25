@@ -17,11 +17,13 @@ import 'package:datav8/features/home/data/repo/hardware_sensor_repo.dart';
 import 'package:datav8/features/home/data/repo/set_alarms_repo.dart';
 import 'package:datav8/features/home/data/repo/set_hardware_configurations_repo.dart';
 import 'package:get/get.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> initBindings() async {
   final prefs = await SharedPreferences.getInstance();
-  Get.put(AuthStorage(prefs));
+  const secureStorage = FlutterSecureStorage();
+  Get.put(AuthStorage(prefs, secureStorage));
 
   final dbClient = Get.put(DbClient());
   dbClient.init();

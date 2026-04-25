@@ -9,7 +9,8 @@ class SetHardwareSensorDropdownController extends GetxController {
   static const int _channelCount = 5;
   bool isLoading = false;
   List<HardwareSensorOptionModel> sensors = [];
-  late final List<String?> _selectedSensorIndexByChannel;
+  List<String?> _selectedSensorIndexByChannel = const <String?>[];
+  bool _isInitialized = false;
   List<String> get dropdownItems => sensors.map((s) => s.label).toList();
 
   setLoading(bool value) {
@@ -17,9 +18,9 @@ class SetHardwareSensorDropdownController extends GetxController {
     update();
   }
 
-  @override
-  void onInit() {
-    super.onInit();
+  void initializeForHome() {
+    if (_isInitialized) return;
+    _isInitialized = true;
     _selectedSensorIndexByChannel = List<String?>.filled(_channelCount, null);
     fetchSensors();
   }

@@ -40,148 +40,146 @@ class SetHardwareConfigurationsTab extends StatelessWidget {
                   child: ListView(
                     padding: const EdgeInsets.all(20),
                     children: [
-                  //===============================
-                  //Select device
-                  //===============================
-                  Container(
-                    color: Colors.grey[100],
-                    padding: const EdgeInsets.all(20),
-                    margin: const EdgeInsets.only(bottom: 34),
-                    child: Column(
-                      children: [
-                        isSavingAnyData
-                            ? const DropdownSavingSkeleton()
-                            : CustomDropDown(
-                                label: 'Select device',
-                                items: c.devices.map((d) => d.title).toList(),
-                                value: c.selectedDeviceTitle,
-                                onChange: c.setSelectedDevice,
-                                borderColor: Colors.black26,
-                                bgColor: Colors.white,
+                      //===============================
+                      //Select device
+                      //===============================
+                      Container(
+                        color: Colors.grey[100],
+                        padding: const EdgeInsets.all(20),
+                        margin: const EdgeInsets.only(bottom: 34),
+                        child: Column(
+                          children: [
+                            isSavingAnyData
+                                ? const DropdownSavingSkeleton()
+                                : CustomDropDown(
+                                    label: 'Select device',
+                                    items: c.devices
+                                        .map((d) => d.title)
+                                        .toList(),
+                                    value: c.selectedDeviceTitle,
+                                    onChange: c.setSelectedDevice,
+                                    borderColor: Colors.black26,
+                                    bgColor: Colors.white,
+                                  ),
+                          ],
+                        ),
+                      ),
+
+                      //===============================
+                      //Logger info
+                      //===============================
+                      (c.isLoggerInfoLoading || !c.isLoggerInfoLoaded)
+                          ? const HardwareLoggerInfoSkeleton()
+                          : HardwareLoggerInfoSection(
+                              ownerController: c.ownerController,
+                              loggerNameController: c.loggerNameController,
+                              locationController: c.locationController,
+                              onSavePressed: c.saveLoggerInfo,
+                              onNoAccessPressed: () => showAlertSnackbar(
+                                'Access denied',
+                                "You don't have access to set this data",
                               ),
-                      ],
-                    ),
-                  ),
+                              isSaving: c.isSavingLoggerInfo,
+                              canSave: canSetHardware,
+                              isAccessLoading: isAccessLoading,
+                            ),
 
-                  //===============================
-                  //Logger info
-                  //===============================
-                  (c.isLoggerInfoLoading || !c.isLoggerInfoLoaded)
-                      ? const HardwareLoggerInfoSkeleton()
-                      : HardwareLoggerInfoSection(
-                          ownerController: c.ownerController,
-                          loggerNameController: c.loggerNameController,
-                          locationController: c.locationController,
-                          onSavePressed: c.saveLoggerInfo,
-                          onNoAccessPressed: () => showAlertSnackbar(
-                            'Access denied',
-                            "You don't have access to set this data",
+                      //===============================
+                      //Channel sections
+                      //===============================
+                      for (
+                        int i = 0;
+                        i < SetHardwareConfigurationsController.channelCount;
+                        i++
+                      ) ...[
+                        Text(
+                          'Channel ${i + 1}',
+                          style: TextUtils.title1Bold(
+                            context: context,
+                            color: Colors.black,
                           ),
-                          isSaving: c.isSavingLoggerInfo,
-                          canSave: canSetHardware,
-                          isAccessLoading: isAccessLoading,
                         ),
-
-                  //===============================
-                  //Channel sections
-                  //===============================
-                  for (
-                    int i = 0;
-                    i < SetHardwareConfigurationsController.channelCount;
-                    i++
-                  ) ...[
-                    Text(
-                      'Channel ${i + 1}',
-                      style: TextUtils.title1Bold(
-                        context: context,
-                        color: Colors.black,
-                      ),
-                    ),
-                    gapH(10),
-                    if (!c.isChannelConfigLoading[i] &&
-                        c.isChannelConfigLoaded[i])
-                      CustomCheckbox(
-                        title: 'Channel ${i + 1} in use',
-                        value: c.channelInUse[i],
-                        onChanged: (v) {
-                          c.toggleChannelInUse(i, v ?? false);
-                        },
-                      ),
-                    if (c.isChannelConfigLoading[i] ||
-                        !c.isChannelConfigLoaded[i])
-                      const HardwareChannelSectionSkeleton()
-                    else if (c.isChannelConfigLoaded[i] &&
-                        c.channelInUse[i]) ...[
-                      gapH(12),
-                      SizedBox(
-                        width: 260,
-                        child: CustomInput(
-                          controller: c.channelNameControllers[i],
-                          labelText: 'Give this channel a name',
-                          hintText: 'Enter channel name',
-                        ),
-                      ),
-                      gapH(25),
-                      CustomDropDown(
-                        label: SetHardwareConfigurationsController
-                            .slotDropdownLabels[i],
-                        items: s.dropdownItems,
-                        value: s.selectedLabelForChannel(i),
-                        onChange: (v) {
-                          if (v == null) return;
-                          s.setSelectedByLabel(i, v);
-                        },
-                        borderColor: Colors.black26,
-                        readonly:
-                            c.isLoadingConfig ||
-                            s.isLoading ||
-                            s.dropdownItems.isEmpty,
-                      ),
-                      gapH(20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildSensorImage(
-                              s.sensorImageForChannel(i),
-                              'Sensor image',
+                        gapH(10),
+                        if (!c.isChannelConfigLoading[i] &&
+                            c.isChannelConfigLoaded[i])
+                          CustomCheckbox(
+                            title: 'Channel ${i + 1} in use',
+                            value: c.channelInUse[i],
+                            onChanged: (v) {
+                              c.toggleChannelInUse(i, v ?? false);
+                            },
+                          ),
+                        if (c.isChannelConfigLoading[i] ||
+                            !c.isChannelConfigLoaded[i])
+                          const HardwareChannelSectionSkeleton()
+                        else if (c.isChannelConfigLoaded[i] &&
+                            c.channelInUse[i]) ...[
+                          gapH(12),
+                          SizedBox(
+                            width: 260,
+                            child: CustomInput(
+                              controller: c.channelNameControllers[i],
+                              labelText: 'Give this channel a name',
+                              hintText: 'Enter channel name',
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildSensorImage(
-                              s.moduleImageForChannel(i),
-                              'Module image',
-                            ),
+                          gapH(25),
+                          CustomDropDown(
+                            label: SetHardwareConfigurationsController
+                                .slotDropdownLabels[i],
+                            items: s.dropdownItems,
+                            value: s.selectedLabelForChannel(i),
+                            onChange: (v) {
+                              if (v == null) return;
+                              s.setSelectedByLabel(i, v);
+                            },
+                            borderColor: Colors.black26,
+                          ),
+                          gapH(20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildSensorImage(
+                                  s.sensorImageForChannel(i),
+                                  'Sensor image',
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildSensorImage(
+                                  s.moduleImageForChannel(i),
+                                  'Module image',
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
-                    gapH(30),
-                    if (!c.isChannelConfigLoading[i] &&
-                        c.isChannelConfigLoaded[i])
-                      ButtonPrimary(
-                        text: 'Save channel ${i + 1}',
-                        onPressed: () {
-                          if (isAccessLoading) return;
-                          if (!canSetHardware) {
-                            showAlertSnackbar(
-                              'Access denied',
-                              "You don't have access to set this data",
-                            );
-                            return;
-                          }
-                          c.saveChannel(i);
-                        },
-                        width: 160,
-                        borderRadius: 5,
-                        boxshadow: false,
-                        bgColor: canSetHardware ? null : Colors.grey,
-                        isLoading: c.isSavingChannel[i] || isAccessLoading,
-                      ),
-                    const SizedBox(height: 26),
-                    const Divider(color: Colors.black12, thickness: 1),
-                    const SizedBox(height: 26),
-                  ],
+                        gapH(30),
+                        if (!c.isChannelConfigLoading[i] &&
+                            c.isChannelConfigLoaded[i])
+                          ButtonPrimary(
+                            text: 'Save channel ${i + 1}',
+                            onPressed: () {
+                              if (isAccessLoading) return;
+                              if (!canSetHardware) {
+                                showAlertSnackbar(
+                                  'Access denied',
+                                  "You don't have access to set this data",
+                                );
+                                return;
+                              }
+                              c.saveChannel(i);
+                            },
+                            width: 160,
+                            borderRadius: 5,
+                            boxshadow: false,
+                            bgColor: canSetHardware ? null : Colors.grey,
+                            isLoading: c.isSavingChannel[i] || isAccessLoading,
+                          ),
+                        const SizedBox(height: 26),
+                        const Divider(color: Colors.black12, thickness: 1),
+                        const SizedBox(height: 26),
+                      ],
                     ],
                   ),
                 );
